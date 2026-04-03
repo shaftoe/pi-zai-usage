@@ -1,6 +1,6 @@
 {
   "name": "@alexanderfortin/pi-zai-usage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pi extension for monitoring Z.ai API token usage quota",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,17 +22,17 @@
     "check": "bun run typecheck && bun run lint",
     "test": "bun test",
     "test:coverage": "bun test --coverage --coverage-reporter=lcov",
-    "publish": "bun run build && bunx npm publish --provenance --access public",
-    "publish:dry-run": "bun run build && bunx npm publish --dry-run"
+    "release": "bun run build && bunx npm publish --access public",
+    "release:dry-run": "bun run build && bunx npm publish --dry-run"
   },
   "dependencies": {
+    "@mariozechner/pi-coding-agent": "^0.64.0",
+    "@mariozechner/pi-tui": "^0.64.0",
+    "@sinclair/typebox": "^0.34.49",
     "temporal-polyfill": "^0.3.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
-    "@mariozechner/pi-coding-agent": "^0.64.0",
-    "@mariozechner/pi-tui": "^0.64.0",
-    "@sinclair/typebox": "^0.34.49",
     "@types/bun": "^1.3.11",
     "typescript": "^6.0.2"
   },
@@ -50,12 +50,22 @@
     "LICENSE"
   ],
   "keywords": [
+    "pi-package",
     "pi-extension",
     "zai",
     "Z.ai",
     "usage-monitoring",
     "api-quota"
   ],
+  "pi": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shaftoe/pi-zai-usage"
+  },
   "author": "Alexander Fortin",
   "license": "MIT"
 }

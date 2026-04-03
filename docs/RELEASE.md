@@ -38,23 +38,25 @@ For a brand new package that doesn't exist on npm yet:
 
    The package.json already includes `"publishConfig": { "access": "public" }`, which ensures the package is published as public when published to npm.
 
-4. **Build and publish the package locally (optional, for manual publish):**
+4. **Build and publish the package manually (optional, for first-time or manual publish):**
 
    ```bash
-   # Build and publish in one command
-   bun run publish
+   # Build and publish locally (without provenance)
+   bun run release
+   ```
+
+   **Note:** The `bun run publish` command is for local/manual publishing and does **not** include provenance signing. Provenance (`--provenance` flag) only works in CI/CD environments like GitHub Actions with OIDC configured.
+
+   To preview what will be published without actually publishing:
+
+   ```bash
+   bun run release:dry-run
    ```
 
    Or build separately:
 
    ```bash
    bun run build
-   ```
-
-   To preview what will be published without actually publishing:
-
-   ```bash
-   bun run publish:dry-run
    ```
 
 5. **Push a version tag to trigger the first release:**
@@ -246,24 +248,36 @@ For the first publish, use the NPM_TOKEN method (Step 1). After the package exis
 
 ## Package Signing and Provenance
 
-This workflow uses NPM's provenance feature, which:
+### Provenance in CI/CD
+
+The GitHub Actions workflow uses NPM's provenance feature, which:
 
 - Signs packages cryptographically
 - Links the package to the GitHub workflow that built it
 - Provides users with confidence in package authenticity
 - Is displayed on the NPM package page
 
-To verify a package's provenance:
+The workflow uses `--provenance` flag which only works in CI/CD environments with OIDC configured.
+
+### Local Publishing
+
+When publishing locally from CLI (using `bun run publish`), provenance is **not** supported because:
+- There's no OIDC provider available locally
+- npm CLI cannot detect a CI/CD environment
+
+This is normal - local publishes don't have provenance, but CI/CD publishes will have it.
+
+### To verify a package's provenance:
 
 ```bash
 npm audit signatures
 ```
 
-**Requirements for provenance:**
+**Requirements for provenance in CI/CD:**
 - npm CLI version 11.5.1 or later
 - Node.js version 22.14.0 or higher
 - `id-token: write` permission in GitHub Actions
-- Trusted publishing configured on npm (or NPM_TOKEN as fallback)
+- Trusted publishing configured on npm
 
 ## Rollback Procedure
 
