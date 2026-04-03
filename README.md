@@ -21,6 +21,21 @@ A [Pi coding agent](https://pi.dev/) extension that monitors [zAi subscription](
 ### Installation
 
 ```bash
+pi install npm:@alexanderfortin/pi-zai-usage
+```
+
+or
+
+```
+pi install https://github.com/shaftoe/pi-zai-usage
+```
+
+or if you prefer to build and keep it checked out locally:
+
+```bash
+git clone https://github.com/shaftoe/pi-zai-usage
+cd pi-zai-usage
+
 # Install dependencies
 bun install
 
@@ -86,13 +101,10 @@ Make sure you're logged in to Z.ai via Pi (`/login for Z.ai`).
 
 ## Releasing
 
-This project uses automated publishing to NPM via GitHub Actions. See [docs/RELEASE.md](docs/RELEASE.md) for detailed release instructions.
-
-The workflow will:
+This project uses automated publishing to NPM via GitHub Actions. The workflow will:
 - Run all CI checks
 - Build the package
-- Publish to NPM with provenance (signed)
-- Create a GitHub release
+- Publish to NPM with provenance (signed) via [trusted publishing](https://docs.npmjs.com/trusted-publishers)
 
 ## License
 
