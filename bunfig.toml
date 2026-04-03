@@ -1,0 +1,11 @@
+[test]
+# Test configuration
+cov = true
+cov_dir = "coverage"
+cov_threshold = 80
+
+# Only run tests matching this pattern
+test_name_pattern = ""
+
+# Timeout for tests (in milliseconds)
+test_timeout = 5000
