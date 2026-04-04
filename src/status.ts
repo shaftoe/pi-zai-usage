@@ -19,6 +19,18 @@ let lastFetchTime = 0
 const FETCH_COOLDOWN_MS = 30_000 // Only fetch every 30 seconds
 
 /**
+ * Build and set the footer status string from usage data
+ */
+function setStatusFromUsage(ctx: ExtensionContext, usageData: ZaiUsageData): void {
+  const theme = ctx.ui.theme
+  let status = theme.fg("muted", "Z.ai: ") + theme.fg("accent", `${usageData.percentage}%`)
+  if (usageData.resetTime && usageData.timeRemaining) {
+    status += ` ${theme.fg("dim", `(${usageData.timeRemaining})`)}`
+  }
+  ctx.ui.setStatus("zai-usage", status)
+}
+
+/**
  * Reset internal state (for testing only)
  */
 export function _resetStateForTesting(): void {
@@ -40,12 +52,7 @@ export async function updateZaiStatus(
 
     // Use cached data if still fresh
     if (lastUsage && lastFetchTime && now - lastFetchTime < FETCH_COOLDOWN_MS) {
-      const theme = ctx.ui.theme
-      let status = theme.fg("muted", "Z.ai: ") + theme.fg("accent", `${lastUsage.percentage}%`)
-      if (lastUsage.resetTime && lastUsage.timeRemaining) {
-        status += ` ${theme.fg("dim", `(${lastUsage.timeRemaining})`)}`
-      }
-      ctx.ui.setStatus("zai-usage", status)
+      setStatusFromUsage(ctx, lastUsage)
       return
     }
 
@@ -53,12 +60,7 @@ export async function updateZaiStatus(
     lastUsage = usage
     lastFetchTime = now
 
-    const theme = ctx.ui.theme
-    let status = theme.fg("muted", "Z.ai: ") + theme.fg("accent", `${usage.percentage}%`)
-    if (usage.resetTime && usage.timeRemaining) {
-      status += ` ${theme.fg("dim", `(${usage.timeRemaining})`)}`
-    }
-    ctx.ui.setStatus("zai-usage", status)
+    setStatusFromUsage(ctx, usage)
   } catch (_error) {
     // Silently clear status on error
     ctx.ui.setStatus("zai-usage", undefined)
