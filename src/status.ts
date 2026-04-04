@@ -23,7 +23,7 @@ const FETCH_COOLDOWN_MS = 30_000 // Only fetch every 30 seconds
  */
 function setStatusFromUsage(ctx: ExtensionContext, usageData: ZaiUsageData): void {
   const theme = ctx.ui.theme
-  let status = theme.fg("muted", "Z.ai: ") + theme.fg("accent", `${usageData.percentage}%`)
+  let status = theme.fg("muted", "Z.ai:") + theme.fg("accent", `${usageData.percentage}%`)
   if (usageData.resetTime && usageData.timeRemaining) {
     status += ` ${theme.fg("dim", `(${usageData.timeRemaining})`)}`
   }

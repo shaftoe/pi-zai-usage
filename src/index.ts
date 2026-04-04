@@ -32,9 +32,6 @@ export default function (pi: ExtensionAPI) {
   pi.on("turn_end", async (_event: unknown, ctx) => {
     if (isCurrentModelZai(ctx)) {
       await updateZaiStatus(ctx)
-    } else {
-      // Clear status if not using zai
-      clearZaiStatus(ctx)
     }
   })
 

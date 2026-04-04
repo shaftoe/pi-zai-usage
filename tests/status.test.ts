@@ -60,7 +60,7 @@ describe("updateZaiStatus", () => {
       await updateZaiStatus(mockCtx, mockFetch)
 
       expect(mockFetch).toHaveBeenCalled()
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai: accent:50%")
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:50%")
     })
 
     it("should set status with reset time and time remaining when available", async () => {
@@ -76,7 +76,7 @@ describe("updateZaiStatus", () => {
       expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
         "zai-usage",
-        "muted:Z.ai: accent:75% dim:(2h 30m)",
+        "muted:Z.ai:accent:75% dim:(2h 30m)",
       )
     })
 
@@ -87,7 +87,7 @@ describe("updateZaiStatus", () => {
       await updateZaiStatus(mockCtx, mockFetch)
 
       expect(mockFetch).toHaveBeenCalled()
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai: accent:0%")
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:0%")
     })
 
     it("should handle 100% usage", async () => {
@@ -97,7 +97,7 @@ describe("updateZaiStatus", () => {
       await updateZaiStatus(mockCtx, mockFetch)
 
       expect(mockFetch).toHaveBeenCalled()
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai: accent:100%")
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:100%")
     })
 
     it("should handle decimal percentage values", async () => {
@@ -107,7 +107,7 @@ describe("updateZaiStatus", () => {
       await updateZaiStatus(mockCtx, mockFetch)
 
       expect(mockFetch).toHaveBeenCalled()
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai: accent:42.5%")
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:42.5%")
     })
 
     it("should clear status on fetch error", async () => {
@@ -135,7 +135,7 @@ describe("updateZaiStatus", () => {
       expect(mockFetch).toHaveBeenCalledTimes(1)
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
         "zai-usage",
-        "muted:Z.ai: accent:50% dim:(2h 30m)",
+        "muted:Z.ai:accent:50% dim:(2h 30m)",
       )
 
       // Reset the mock to track if it's called again
@@ -149,7 +149,7 @@ describe("updateZaiStatus", () => {
       // Status should still be set with cached data
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
         "zai-usage",
-        "muted:Z.ai: accent:50% dim:(2h 30m)",
+        "muted:Z.ai:accent:50% dim:(2h 30m)",
       )
     })
 
@@ -160,7 +160,7 @@ describe("updateZaiStatus", () => {
       // First call
       await updateZaiStatus(mockCtx, mockFetch)
       expect(mockFetch).toHaveBeenCalledTimes(1)
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai: accent:30%")
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:30%")
 
       // Reset mock
       ;(mockFetch as ReturnType<typeof mock>).mockClear()
@@ -168,7 +168,7 @@ describe("updateZaiStatus", () => {
       // Second call - should use cache
       await updateZaiStatus(mockCtx, mockFetch)
       expect(mockFetch).toHaveBeenCalledTimes(0)
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai: accent:30%")
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:30%")
     })
 
     it("should fetch new data after cooldown period expires", async () => {
@@ -315,7 +315,7 @@ describe("tryShowFooter", () => {
 
     await tryShowFooter(mockCtx, mockFetch)
 
-    expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai: accent:50%")
+    expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:50%")
   })
 
   it("should handle errors gracefully without throwing", async () => {
