@@ -6,20 +6,18 @@
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent"
-import { clearZaiStatus, isCurrentModelZai, tryShowFooter, updateZaiStatus } from "./status"
+import { clearZaiStatus, isCurrentModelZai, updateZaiStatus } from "./status"
 
 export default function (pi: ExtensionAPI) {
-  // --- Event listeners for automatic status display ---
-
-  // Show footer at session start - try without checking model (handles errors gracefully)
+  // Show footer at session start (handles errors gracefully)
   pi.on("session_start", async (_event: unknown, ctx) => {
-    await tryShowFooter(ctx)
+    await updateZaiStatus(ctx)
   })
 
   // Update footer on model select
   pi.on("model_select", async (event: unknown, ctx) => {
     const modelEvent = event as {
-      model: { provider: string; id: string } | undefined
+      model?: { provider: string; id: string }
     }
     if (modelEvent.model?.provider === "zai") {
       await updateZaiStatus(ctx)

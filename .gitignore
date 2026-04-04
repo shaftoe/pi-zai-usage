@@ -6,6 +6,7 @@ dist/
 *.tsbuildinfo
 
 # IDE
+.zed/
 .vscode/
 .idea/
 *.swp

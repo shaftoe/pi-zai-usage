@@ -3,8 +3,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
-import { getZaiUsage } from "../src/api"
-import type { ZaiUsageResponse } from "../src/types"
+import { getZaiUsage, type ZaiUsageResponse } from "../src/api"
 
 describe("getZaiUsage", () => {
   let mockModelRegistry: any

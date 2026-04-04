@@ -3,15 +3,15 @@
  */
 
 import { beforeEach, describe, expect, it, mock } from "bun:test"
+import type { ExtensionContext } from "@mariozechner/pi-coding-agent"
+import type { ZaiUsageData } from "../src/api"
 import {
   _resetStateForTesting,
   clearZaiStatus,
   type FetchUsageFn,
   isCurrentModelZai,
-  tryShowFooter,
   updateZaiStatus,
 } from "../src/status"
-import type { ExtensionContext, ZaiUsageData } from "../src/types"
 
 // Helper to create a mock context
 const createMockContext = (
@@ -291,6 +291,30 @@ describe("updateZaiStatus", () => {
       const result = updateZaiStatus(mockCtx, mockFetch)
       await expect(result).resolves.toBeUndefined()
     })
+
+    it("should log error to console on fetch error", async () => {
+      const mockCtx = createMockContext()
+      const mockFetch = createThrowingFetchUsage("API request failed")
+      const mockConsoleError = mock(() => {
+        // Capture console.error calls
+      })
+      const originalConsoleError = console.error
+
+      console.error = mockConsoleError
+
+      try {
+        await updateZaiStatus(mockCtx, mockFetch)
+
+        expect(mockConsoleError).toHaveBeenCalled()
+        const calls = mockConsoleError.mock.calls as unknown[][]
+        expect(calls.length).toBeGreaterThan(0)
+        const errorMessage = calls[0]?.[0] as string
+        expect(errorMessage).toContain("Error updating Z.ai usage:")
+        expect(errorMessage).toContain("API request failed")
+      } finally {
+        console.error = originalConsoleError
+      }
+    })
   })
 })
 
@@ -305,36 +329,6 @@ describe("clearZaiStatus", () => {
     clearZaiStatus(mockCtx)
 
     expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
-  })
-})
-
-describe("tryShowFooter", () => {
-  it("should call updateZaiStatus and handle success", async () => {
-    const mockCtx = createMockContext()
-    const mockFetch = createMockFetchUsage({ percentage: 50 })
-
-    await tryShowFooter(mockCtx, mockFetch)
-
-    expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:50%")
-  })
-
-  it("should handle errors gracefully without throwing", async () => {
-    const mockCtx = createMockContext()
-    const mockFetch = createThrowingFetchUsage("Some error")
-
-    const result = tryShowFooter(mockCtx, mockFetch)
-    await expect(result).resolves.toBeUndefined()
-
-    expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
-  })
-
-  it("should pass fetchUsage function to updateZaiStatus", async () => {
-    const mockCtx = createMockContext()
-    const mockFetch = createMockFetchUsage({ percentage: 75 })
-
-    await tryShowFooter(mockCtx, mockFetch)
-
-    expect(mockFetch).toHaveBeenCalled()
   })
 })
 

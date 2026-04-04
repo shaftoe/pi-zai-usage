@@ -3,8 +3,28 @@
  * API interaction functions
  */
 
+import type { ModelRegistry } from "@mariozechner/pi-coding-agent"
 import { formatInstantFromEpochMs, formatTimeRemainingFromEpochMs } from "./datetime"
-import type { ModelRegistry, ZaiUsageData, ZaiUsageResponse } from "./types"
+
+const ZAI_USAGE_API_URL = "https://api.z.ai/api/monitor/usage/quota/limit"
+
+// --- API types ---
+
+export interface ZaiUsageResponse {
+  data: {
+    limits: Array<{
+      type: string
+      percentage: number
+      nextResetTime?: number
+    }>
+  }
+}
+
+export interface ZaiUsageData {
+  percentage: number
+  resetTime?: string
+  timeRemaining?: string
+}
 
 /**
  * Fetch Z.ai usage from the API
@@ -17,7 +37,7 @@ export async function getZaiUsage(
     throw new Error("Missing Z.ai API credentials. Run /login for Z.ai.")
   }
 
-  const response = await fetch("https://api.z.ai/api/monitor/usage/quota/limit", {
+  const response = await fetch(ZAI_USAGE_API_URL, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
     },

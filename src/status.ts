@@ -3,13 +3,16 @@
  * Footer status management
  */
 
+import type {
+  ExtensionContext as PiExtensionContext,
+  ModelRegistry as PiModelRegistry,
+} from "@mariozechner/pi-coding-agent"
 import { Temporal } from "temporal-polyfill"
-import { getZaiUsage } from "./api"
-import type { ExtensionContext, ModelRegistry, ZaiUsageData } from "./types"
+import { getZaiUsage, type ZaiUsageData } from "./api"
 
 // Type for the fetch usage function (same signature as getZaiUsage)
 export type FetchUsageFn = (
-  modelRegistry: Pick<ModelRegistry, "getApiKeyForProvider">,
+  modelRegistry: Pick<PiModelRegistry, "getApiKeyForProvider">,
 ) => Promise<ZaiUsageData>
 
 // --- Widget state ---
@@ -21,7 +24,7 @@ const FETCH_COOLDOWN_MS = 30_000 // Only fetch every 30 seconds
 /**
  * Build and set the footer status string from usage data
  */
-function setStatusFromUsage(ctx: ExtensionContext, usageData: ZaiUsageData): void {
+function setStatusFromUsage(ctx: PiExtensionContext, usageData: ZaiUsageData): void {
   const theme = ctx.ui.theme
   let status = theme.fg("muted", "Z.ai:") + theme.fg("accent", `${usageData.percentage}%`)
   if (usageData.resetTime && usageData.timeRemaining) {
@@ -44,7 +47,7 @@ export function _resetStateForTesting(): void {
  * @param fetchUsage - Optional function to fetch usage data (injected for testing)
  */
 export async function updateZaiStatus(
-  ctx: ExtensionContext,
+  ctx: PiExtensionContext,
   fetchUsage: FetchUsageFn = getZaiUsage,
 ): Promise<void> {
   try {
@@ -61,34 +64,22 @@ export async function updateZaiStatus(
     lastFetchTime = now
 
     setStatusFromUsage(ctx, usage)
-  } catch (_error) {
-    // Silently clear status on error
-    ctx.ui.setStatus("zai-usage", undefined)
+  } catch (error) {
+    console.error(`Error updating Z.ai usage: ${error}`)
+    clearZaiStatus(ctx)
   }
 }
 
 /**
  * Clear the Z.ai usage footer status
  */
-export function clearZaiStatus(ctx: ExtensionContext): void {
+export function clearZaiStatus(ctx: PiExtensionContext): void {
   ctx.ui.setStatus("zai-usage", undefined)
-}
-
-/**
- * Try to show footer status, handling errors gracefully
- * @param ctx - Extension context
- * @param fetchUsage - Optional function to fetch usage data (injected for testing)
- */
-export async function tryShowFooter(
-  ctx: ExtensionContext,
-  fetchUsage?: FetchUsageFn,
-): Promise<void> {
-  await updateZaiStatus(ctx, fetchUsage)
 }
 
 /**
  * Check if the current model is a Z.ai model
  */
-export function isCurrentModelZai(ctx: ExtensionContext): boolean {
+export function isCurrentModelZai(ctx: PiExtensionContext): boolean {
   return ctx.model?.provider === "zai"
 }
