@@ -6,20 +6,17 @@
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent"
-import { clearZaiStatus, isCurrentModelZai, updateZaiStatus } from "./status"
+import { clearZaiStatus, isCurrentModelZai, isZaiProvider, updateZaiStatus } from "./status"
 
 export default function (pi: ExtensionAPI) {
   // Show footer at session start (handles errors gracefully)
-  pi.on("session_start", async (_event: unknown, ctx) => {
+  pi.on("session_start", async (_event, ctx) => {
     await updateZaiStatus(ctx)
   })
 
   // Update footer on model select
-  pi.on("model_select", async (event: unknown, ctx) => {
-    const modelEvent = event as {
-      model?: { provider: string; id: string }
-    }
-    if (modelEvent.model?.provider === "zai") {
+  pi.on("model_select", async (event, ctx) => {
+    if (isZaiProvider(event.model.provider)) {
       await updateZaiStatus(ctx)
     } else {
       clearZaiStatus(ctx)
@@ -27,18 +24,14 @@ export default function (pi: ExtensionAPI) {
   })
 
   // Update footer after each turn
-  pi.on("turn_end", async (_event: unknown, ctx) => {
+  pi.on("turn_end", async (_event, ctx) => {
     if (isCurrentModelZai(ctx)) {
       await updateZaiStatus(ctx)
     }
   })
 
-  // Clear footer on session switch/shutdown
-  pi.on("session_switch", async (_event: unknown, ctx) => {
-    clearZaiStatus(ctx)
-  })
-
-  pi.on("session_shutdown", async (_event: unknown, ctx) => {
+  // Clear footer on session shutdown
+  pi.on("session_shutdown", async (_event, ctx) => {
     clearZaiStatus(ctx)
   })
 }

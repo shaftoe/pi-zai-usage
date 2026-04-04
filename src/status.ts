@@ -78,8 +78,15 @@ export function clearZaiStatus(ctx: PiExtensionContext): void {
 }
 
 /**
+ * Check if a provider name is a Z.ai provider (e.g., "zai", "zai-extra", etc.)
+ */
+export function isZaiProvider(provider: string | undefined): boolean {
+  return provider?.toLowerCase().startsWith("zai") ?? false
+}
+
+/**
  * Check if the current model is a Z.ai model
  */
 export function isCurrentModelZai(ctx: PiExtensionContext): boolean {
-  return ctx.model?.provider === "zai"
+  return isZaiProvider(ctx.model?.provider)
 }

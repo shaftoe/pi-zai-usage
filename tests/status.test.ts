@@ -10,6 +10,7 @@ import {
   clearZaiStatus,
   type FetchUsageFn,
   isCurrentModelZai,
+  isZaiProvider,
   updateZaiStatus,
 } from "../src/status"
 
@@ -332,12 +333,58 @@ describe("clearZaiStatus", () => {
   })
 })
 
+describe("isZaiProvider", () => {
+  it("should return true for 'zai'", () => {
+    expect(isZaiProvider("zai")).toBe(true)
+  })
+
+  it("should return true for providers starting with 'zai'", () => {
+    expect(isZaiProvider("zai-extra")).toBe(true)
+    expect(isZaiProvider("zai-pro")).toBe(true)
+    expect(isZaiProvider("zai-enterprise")).toBe(true)
+  })
+
+  it("should return false for non-zai providers", () => {
+    expect(isZaiProvider("anthropic")).toBe(false)
+    expect(isZaiProvider("openai")).toBe(false)
+    expect(isZaiProvider("google")).toBe(false)
+  })
+
+  it("should return false for undefined provider", () => {
+    expect(isZaiProvider(undefined)).toBe(false)
+  })
+
+  it("should be case insensitive", () => {
+    expect(isZaiProvider("ZAI")).toBe(true)
+    expect(isZaiProvider("Zai")).toBe(true)
+    expect(isZaiProvider("zAi")).toBe(true)
+    expect(isZaiProvider("ZAI-EXTRA")).toBe(true)
+    expect(isZaiProvider("Zai-Pro")).toBe(true)
+  })
+
+  it("should return false for providers that contain 'zai' but don't start with it", () => {
+    expect(isZaiProvider("my-zai-provider")).toBe(false)
+    expect(isZaiProvider("not-zai")).toBe(false)
+  })
+})
+
 describe("isCurrentModelZai", () => {
   it("should return true when current model provider is zai", () => {
     const mockCtx: ExtensionContext = {
       model: {
         provider: "zai",
         id: "some-model",
+      },
+    } as any
+
+    expect(isCurrentModelZai(mockCtx)).toBe(true)
+  })
+
+  it("should return true when current model provider starts with zai", () => {
+    const mockCtx: ExtensionContext = {
+      model: {
+        provider: "zai-extra",
+        id: "zai-model-1",
       },
     } as any
 
@@ -371,7 +418,7 @@ describe("isCurrentModelZai", () => {
     expect(isCurrentModelZai(mockCtx)).toBe(false)
   })
 
-  it("should be case sensitive for provider name", () => {
+  it("should be case insensitive for provider name", () => {
     const mockCtx: ExtensionContext = {
       model: {
         provider: "ZAI",
@@ -379,7 +426,7 @@ describe("isCurrentModelZai", () => {
       },
     } as any
 
-    expect(isCurrentModelZai(mockCtx)).toBe(false)
+    expect(isCurrentModelZai(mockCtx)).toBe(true)
   })
 
   it("should handle model object with only provider property", () => {
