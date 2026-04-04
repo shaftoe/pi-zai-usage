@@ -6,32 +6,36 @@
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent"
-import { clearZaiStatus, isCurrentModelZai, isZaiProvider, updateZaiStatus } from "./status"
+import { isCurrentModelZai, isZaiProvider, ZaiUsageCache } from "./status"
 
 export default function (pi: ExtensionAPI) {
-  // Show footer at session start (handles errors gracefully)
+  const cache = new ZaiUsageCache()
+
+  // Show footer at session start (only when using Z.ai model)
   pi.on("session_start", async (_event, ctx) => {
-    await updateZaiStatus(ctx)
+    if (isCurrentModelZai(ctx)) {
+      await cache.updateStatus(ctx)
+    }
   })
 
   // Update footer on model select
   pi.on("model_select", async (event, ctx) => {
     if (isZaiProvider(event.model.provider)) {
-      await updateZaiStatus(ctx)
+      await cache.updateStatus(ctx)
     } else {
-      clearZaiStatus(ctx)
+      cache.clear(ctx)
     }
   })
 
   // Update footer after each turn
   pi.on("turn_end", async (_event, ctx) => {
     if (isCurrentModelZai(ctx)) {
-      await updateZaiStatus(ctx)
+      await cache.updateStatus(ctx)
     }
   })
 
   // Clear footer on session shutdown
   pi.on("session_shutdown", async (_event, ctx) => {
-    clearZaiStatus(ctx)
+    cache.clear(ctx)
   })
 }

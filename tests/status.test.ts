@@ -2,17 +2,10 @@
  * Unit tests for status.ts
  */
 
-import { beforeEach, describe, expect, it, mock } from "bun:test"
+import { describe, expect, it, mock } from "bun:test"
 import type { ExtensionContext } from "@mariozechner/pi-coding-agent"
 import type { ZaiUsageData } from "../src/api"
-import {
-  _resetStateForTesting,
-  clearZaiStatus,
-  type FetchUsageFn,
-  isCurrentModelZai,
-  isZaiProvider,
-  updateZaiStatus,
-} from "../src/status"
+import { isCurrentModelZai, isZaiProvider, ZaiUsageCache } from "../src/status"
 
 // Helper to create a mock context
 const createMockContext = (
@@ -38,29 +31,30 @@ const createMockContext = (
 }
 
 // Helper to create a mock fetch usage function
-const createMockFetchUsage = (data: ZaiUsageData): FetchUsageFn & ReturnType<typeof mock> => {
-  return mock(() => Promise.resolve(data)) as any
-}
+const createMockFetchUsage = (data: ZaiUsageData) => mock(() => Promise.resolve(data)) as any
 
 // Helper to create a mock fetch usage function that throws
-const createThrowingFetchUsage = (errorMessage: string): FetchUsageFn & ReturnType<typeof mock> => {
-  return mock(() => Promise.reject(new Error(errorMessage))) as any
+const createThrowingFetchUsage = (errorMessage: string) =>
+  mock(() => Promise.reject(new Error(errorMessage))) as any
+
+// Helper to create a cache with mocked fetch
+const createMockCache = (fetchFn: ReturnType<typeof createMockFetchUsage>) => {
+  const cache = new ZaiUsageCache()
+  // Monkey-patch the updateStatus method to use our mock fetch
+  const originalUpdateStatus = cache.updateStatus.bind(cache)
+  cache.updateStatus = (ctx) => originalUpdateStatus(ctx, fetchFn)
+  return cache
 }
 
-// Reset module state between tests
-beforeEach(() => {
-  _resetStateForTesting()
-})
-
-describe("updateZaiStatus", () => {
+describe("ZaiUsageCache", () => {
   describe("fresh API call scenarios", () => {
     it("should set status with usage percentage from fresh API call", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createMockFetchUsage({ percentage: 50 })
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
-      expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:50%")
     })
 
@@ -71,10 +65,10 @@ describe("updateZaiStatus", () => {
         resetTime: "2025-04-04T00:00:00Z",
         timeRemaining: "2h 30m",
       })
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
-      expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
         "zai-usage",
         "muted:Z.ai:accent:75% dim:(2h 30m)",
@@ -84,40 +78,50 @@ describe("updateZaiStatus", () => {
     it("should handle 0% usage", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createMockFetchUsage({ percentage: 0 })
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
-      expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:0%")
     })
 
     it("should handle 100% usage", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createMockFetchUsage({ percentage: 100 })
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
-      expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:100%")
     })
 
     it("should handle decimal percentage values", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createMockFetchUsage({ percentage: 42.5 })
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
-      expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:42.5%")
+    })
+
+    it("should round percentage to 1 decimal place", async () => {
+      const mockCtx = createMockContext()
+      const mockFetch = createMockFetchUsage({ percentage: 42.567 })
+      const cache = createMockCache(mockFetch)
+
+      await cache.updateStatus(mockCtx)
+
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:42.6%")
     })
 
     it("should clear status on fetch error", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("API error")
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
-      expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
     })
   })
@@ -130,23 +134,21 @@ describe("updateZaiStatus", () => {
         resetTime: "2025-04-04T00:00:00Z",
         timeRemaining: "2h 30m",
       })
+      const cache = createMockCache(mockFetch)
 
       // First call - should fetch
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
       expect(mockFetch).toHaveBeenCalledTimes(1)
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
         "zai-usage",
         "muted:Z.ai:accent:50% dim:(2h 30m)",
       )
 
-      // Reset the mock to track if it's called again
-      ;(mockFetch as ReturnType<typeof mock>).mockClear()
-
       // Second call immediately - should use cache (within 30s cooldown)
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
       // Mock should not be called again (cached data used)
-      expect(mockFetch).toHaveBeenCalledTimes(0)
+      expect(mockFetch).toHaveBeenCalledTimes(1)
       // Status should still be set with cached data
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
         "zai-usage",
@@ -157,48 +159,17 @@ describe("updateZaiStatus", () => {
     it("should set status with only percentage when cached data has no reset info", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createMockFetchUsage({ percentage: 30 })
+      const cache = createMockCache(mockFetch)
 
       // First call
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
       expect(mockFetch).toHaveBeenCalledTimes(1)
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:30%")
-
-      // Reset mock
-      ;(mockFetch as ReturnType<typeof mock>).mockClear()
 
       // Second call - should use cache
-      await updateZaiStatus(mockCtx, mockFetch)
-      expect(mockFetch).toHaveBeenCalledTimes(0)
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:30%")
-    })
-
-    it("should fetch new data after cooldown period expires", async () => {
-      const mockCtx = createMockContext()
-      const mockFetch = createMockFetchUsage({ percentage: 50 })
-
-      // First call
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
       expect(mockFetch).toHaveBeenCalledTimes(1)
-
-      // Note: Testing cache expiry requires waiting 30+ seconds, which is not practical in unit tests.
-      // The cache hit scenario above covers the caching logic. Cache expiry behavior is tested
-      // indirectly through integration tests.
-
-      // Wait for cooldown to expire (30s + buffer)
-      // We can't actually wait 30s in tests, so we need to clear the module state
-      // Since we can't access module state directly, we'll use a different mock
-      // and verify it's called - but we can't test the time-based expiration
-      // without waiting. Let's document this limitation.
-      //
-      // Note: Testing cache expiry requires either:
-      // 1. Waiting 30+ seconds (not practical in unit tests)
-      // 2. Exposing module state for test manipulation
-      // 3. Using a configurable cooldown parameter (would require API change)
-      //
-      // For now, we verify the cache hit scenario which covers the caching logic.
-
-      // This test is a placeholder for cache expiry behavior
-      expect(true).toBe(true)
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:30%")
     })
   })
 
@@ -206,8 +177,9 @@ describe("updateZaiStatus", () => {
     it("should use theme colors for formatting", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createMockFetchUsage({ percentage: 50 })
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
       const statusCall = mockCtx.ui.setStatus.mock.calls[0]
       expect(statusCall).toBeDefined()
@@ -225,8 +197,9 @@ describe("updateZaiStatus", () => {
         resetTime: "2025-04-04T00:00:00Z",
         timeRemaining: "1h 0m",
       })
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
       const statusCall = mockCtx.ui.setStatus.mock.calls[0]
       expect(statusCall).toBeDefined()
@@ -236,8 +209,9 @@ describe("updateZaiStatus", () => {
     it("should not include dim color when reset time is absent", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createMockFetchUsage({ percentage: 50 })
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
       const statusCall = mockCtx.ui.setStatus.mock.calls[0]
       expect(statusCall).toBeDefined()
@@ -249,28 +223,29 @@ describe("updateZaiStatus", () => {
     it("should clear status on fetch error", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("Network error")
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
-      expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
     })
 
     it("should clear status on timeout error", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("Request timeout")
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
-      expect(mockFetch).toHaveBeenCalled()
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
     })
 
     it("should handle API returning 401 unauthorized", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("API request failed with status 401")
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
     })
@@ -278,8 +253,9 @@ describe("updateZaiStatus", () => {
     it("should handle API returning 500 server error", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("API request failed with status 500")
+      const cache = createMockCache(mockFetch)
 
-      await updateZaiStatus(mockCtx, mockFetch)
+      await cache.updateStatus(mockCtx)
 
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
     })
@@ -287,15 +263,17 @@ describe("updateZaiStatus", () => {
     it("should not throw errors, catch them silently", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("Some error")
+      const cache = createMockCache(mockFetch)
 
       // Should not throw
-      const result = updateZaiStatus(mockCtx, mockFetch)
-      await expect(result).resolves.toBeUndefined()
+      const result = await cache.updateStatus(mockCtx)
+      await expect(result).toBeUndefined()
     })
 
     it("should log error to console on fetch error", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("API request failed")
+      const cache = createMockCache(mockFetch)
       const mockConsoleError = mock(() => {
         // Capture console.error calls
       })
@@ -304,10 +282,10 @@ describe("updateZaiStatus", () => {
       console.error = mockConsoleError
 
       try {
-        await updateZaiStatus(mockCtx, mockFetch)
+        await cache.updateStatus(mockCtx)
 
         expect(mockConsoleError).toHaveBeenCalled()
-        const calls = mockConsoleError.mock.calls as unknown[][]
+        const calls = mockConsoleError.mock.calls as Array<unknown[]>
         expect(calls.length).toBeGreaterThan(0)
         const errorMessage = calls[0]?.[0] as string
         expect(errorMessage).toContain("Error updating Z.ai usage:")
@@ -319,15 +297,16 @@ describe("updateZaiStatus", () => {
   })
 })
 
-describe("clearZaiStatus", () => {
-  it("should clear the zai-usage status", () => {
+describe("ZaiUsageCache.clear", () => {
+  it("should clear zai-usage status", () => {
     const mockCtx: ExtensionContext = {
       ui: {
         setStatus: mock(() => {}),
       },
     } as any
 
-    clearZaiStatus(mockCtx)
+    const cache = new ZaiUsageCache()
+    cache.clear(mockCtx)
 
     expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
   })

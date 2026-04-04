@@ -2,7 +2,7 @@
 
 [![codecov](https://codecov.io/gh/shaftoe/pi-zai-usage/graph/badge.svg?token=CcWlPO46JM)](https://codecov.io/gh/shaftoe/pi-zai-usage)
 
-A [Pi coding agent](https://pi.dev/) extension that monitors [zAi subscription](https://z.ai/subscribe) API token usage quota and automatically displays usage in the footer when using the Z.ai provider.
+A [Pi coding agent](https://pi.dev/) extension that monitors [Z.ai subscription](https://z.ai/subscribe) API token usage quota and automatically displays usage in the footer when using the Z.ai provider.
 
 ![screenshot](./screenshot.png)
 

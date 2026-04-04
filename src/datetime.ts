@@ -29,13 +29,13 @@ export function formatInstantFromEpochMs(ms: number): string {
 export function formatTimeRemainingFromEpochMs(ms: number): string {
   const now = Temporal.Now.instant()
   const target = Temporal.Instant.fromEpochMilliseconds(ms)
-  const duration = target.since(now)
 
-  // If the time is in the past but within 1 second, treat as now (0s)
-  // This handles edge cases where the target time is exactly now or slightly in the past
-  if (duration.sign < 0 && duration.seconds < -1) {
+  // If the target time is in the past, return zero
+  if (target.epochMilliseconds < now.epochMilliseconds) {
     return "0h 0m 0s"
   }
+
+  const duration = target.since(now)
 
   const totalSeconds = Math.round(Math.abs(duration.seconds))
   const hours = Math.floor(totalSeconds / 3600)
