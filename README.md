@@ -9,7 +9,7 @@ A [Pi coding agent](https://pi.dev/) extension that monitors [Z.ai subscription]
 ## Features
 
 - **Auto Footer Display**: Automatically shows usage in the footer when using Z.ai models
-- **Smart Caching**: Fetches usage every 30 seconds to avoid excessive API calls
+- **Smart Caching**: Caches usage data for 30 seconds to avoid excessive API calls
 - **Time Tracking**: Displays remaining time until quota reset
 
 ## Setup
