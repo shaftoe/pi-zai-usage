@@ -1,6 +1,6 @@
 {
   "name": "@alexanderfortin/pi-zai-usage",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Pi extension for monitoring Z.ai API token usage quota",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/shaftoe/pi-zai-usage/compare/v0.1.7...v0.1.8) (2026-04-09)
+
+
+### Bug Fixes
+
+* correct CHANGELOG format and semantic release configuration ([08cbc35](https://github.com/shaftoe/pi-zai-usage/commit/08cbc356f2fcbf6bd7974bfdacd0d464201741ad))
+
 All notable changes to this project will be documented in this file.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and
