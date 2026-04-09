@@ -8,5 +8,3 @@ pre-commit:
       run: bun run check
     test:
       run: bun test
-    build:
-      run: bun run build

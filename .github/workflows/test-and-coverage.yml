@@ -1,15 +1,14 @@
 name: Test and coverage
 
 on:
+  pull_request:
+    branches: [master]
   workflow_call:
     inputs:
       coverage:
         type: boolean
         required: false
         default: false
-  push:
-    branches:
-      - master
 
 permissions:
   contents: read
@@ -45,6 +44,3 @@ jobs:
           fail_ci_if_error: true
           verbose: true
           use_oidc: true
-
-      - name: Build package
-        run: bun run build
