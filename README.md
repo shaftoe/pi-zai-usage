@@ -12,13 +12,7 @@ A [Pi coding agent](https://pi.dev/) extension that monitors [Z.ai subscription]
 - **Smart Caching**: Caches usage data for 30 seconds to avoid excessive API calls
 - **Time Tracking**: Displays remaining time until quota reset
 
-## Setup
-
-### Prerequisites
-
-- [Bun](https://bun.sh/) - Fast JavaScript package manager and runtime
-
-### Installation
+## Install
 
 ```bash
 pi install npm:@alexanderfortin/pi-zai-usage
