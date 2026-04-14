@@ -1,25 +1,23 @@
 # Changelog
 
-## [0.1.8](https://github.com/shaftoe/pi-zai-usage/compare/v0.1.7...v0.1.8) (2026-04-09)
-
-
-### Bug Fixes
-
-* correct CHANGELOG format and semantic release configuration ([08cbc35](https://github.com/shaftoe/pi-zai-usage/commit/08cbc356f2fcbf6bd7974bfdacd0d464201741ad))
-
 All notable changes to this project will be documented in this file.
 
-This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and
-uses [semantic-release](https://semantic-release.gitbook.io/) for automated releases.
-The format is based on [Keep a Changelog](https://keepachangelog.org/en/1.1.0/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.1.7](https://github.com/shaftoe/pi-zai-usage/compare/v0.1.6...v0.1.7) (2026-04-09)
+## [0.1.8] - 2026-04-09
 
-### Bug Fixes
+### Fixed
 
-* add semantic release automated workflow ([5d5d7b8](https://github.com/shaftoe/pi-zai-usage/commit/5d5d7b8de972b315c957795fc531059f35ad7268))
+- correct CHANGELOG format and semantic release configuration
+
+## [0.1.7] - 2026-04-09
+
+### Fixed
+
+- add semantic release automated workflow
 
 ## [0.1.6] - 2026-04-04
 
@@ -31,9 +29,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.org/en/1.1.0/).
 
 ### Changed
 
-- fix: remove redundant cleanup for turn_end
-- refactor: reduce duplication in set status logic
-- docs: fix readme
+- remove redundant cleanup for turn_end
+- reduce duplication in set status logic
+- fix readme
 
 ## [0.1.2] - 2026-04-03
 
@@ -51,4 +49,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.org/en/1.1.0/).
 - Smart caching (30-second cache to avoid excessive API calls)
 - Temporal-based datetime formatting
 - Time tracking (reset time and remaining time display)
+
+### Changed
+
 - Enabled full OIDC publishing (no NPM_TOKEN required)
+
+[unreleased]: https://github.com/shaftoe/pi-zai-usage/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/shaftoe/pi-zai-usage/compare/v0.1.7...v0.1.8
+[0.1.7]: https://github.com/shaftoe/pi-zai-usage/compare/v0.1.6...v0.1.7
+[0.1.6]: https://github.com/shaftoe/pi-zai-usage/compare/v0.1.3...v0.1.6
+[0.1.3]: https://github.com/shaftoe/pi-zai-usage/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/shaftoe/pi-zai-usage/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/shaftoe/pi-zai-usage/releases/tag/v0.1.1

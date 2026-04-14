@@ -9,19 +9,7 @@ export default {
   branches: ["master"],
   plugins: [
     "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    [
-      "@semantic-release/changelog",
-      {
-        changelogFile: "CHANGELOG.md",
-        changelogTitle: "# Changelog",
-        header:
-          "All notable changes to this project will be documented in this file.\n\n" +
-          "This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and\n" +
-          "uses [semantic-release](https://semantic-release.gitbook.io/) for automated releases.\n" +
-          "The format is based on [Keep a Changelog](https://keepachangelog.org/en/1.1.0/).\n\n",
-      },
-    ],
+    "@alexanderfortin/semantic-release-keep-a-changelog",
     [
       "@semantic-release/npm",
       {
