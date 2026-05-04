@@ -26,13 +26,13 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "dependencies": {
-    "@mariozechner/pi-coding-agent": "0.70.2",
+    "@mariozechner/pi-coding-agent": "0.73.0",
     "@sinclair/typebox": "0.34.49",
     "temporal-polyfill": "0.3.2"
   },
   "devDependencies": {
-    "@alexanderfortin/semantic-release-keep-a-changelog": "0.2.0",
-    "@biomejs/biome": "2.4.13",
+    "@alexanderfortin/semantic-release-keep-a-changelog": "0.2.1",
+    "@biomejs/biome": "2.4.14",
     "@semantic-release/commit-analyzer": "13.0.1",
     "@semantic-release/exec": "7.1.0",
     "@semantic-release/git": "10.0.1",
@@ -43,8 +43,7 @@
     "typescript": "6.0.3"
   },
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*",
-    "@mariozechner/pi-tui": "0.70.2"
+    "@mariozechner/pi-tui": "0.73.0"
   },
   "publishConfig": {
     "access": "public"
