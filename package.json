@@ -26,7 +26,7 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "dependencies": {
-    "@mariozechner/pi-coding-agent": "0.70.2",
+    "@mariozechner/pi-coding-agent": "0.72.1",
     "@sinclair/typebox": "0.34.49",
     "temporal-polyfill": "0.3.2"
   },
