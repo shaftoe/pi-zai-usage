@@ -3,7 +3,7 @@
  * API interaction functions
  */
 
-import type { ModelRegistry } from "@mariozechner/pi-coding-agent"
+import type { ModelRegistry } from "@earendil-works/pi-coding-agent"
 import { formatInstantFromEpochMs, formatTimeRemainingFromEpochMs } from "./datetime"
 
 const ZAI_USAGE_API_URL = "https://api.z.ai/api/monitor/usage/quota/limit"

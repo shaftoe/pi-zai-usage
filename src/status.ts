@@ -6,7 +6,7 @@
 import type {
   ExtensionContext as PiExtensionContext,
   ModelRegistry as PiModelRegistry,
-} from "@mariozechner/pi-coding-agent"
+} from "@earendil-works/pi-coding-agent"
 import { Temporal } from "temporal-polyfill"
 import { getZaiUsage, type ZaiUsageData } from "./api"
 

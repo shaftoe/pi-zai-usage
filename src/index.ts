@@ -5,7 +5,7 @@
  * usage in the footer (information area) when using Z.ai provider.
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent"
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent"
 import { isCurrentModelZai, isZaiProvider, ZaiUsageCache } from "./status"
 
 export default function (pi: ExtensionAPI) {

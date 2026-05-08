@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it, mock } from "bun:test"
-import type { ExtensionContext } from "@mariozechner/pi-coding-agent"
+import type { ExtensionContext } from "@earendil-works/pi-coding-agent"
 import type { ZaiUsageData } from "../src/api"
 import { isCurrentModelZai, isZaiProvider, ZaiUsageCache } from "../src/status"
 
