@@ -20,6 +20,12 @@ export interface ZaiUsageResponse {
   }
 }
 
+export interface ZaiApiError {
+  code: number
+  msg: string
+  success: boolean
+}
+
 export interface ZaiUsageData {
   percentage: number
   resetTime?: string
@@ -47,8 +53,31 @@ export async function getZaiUsage(
     throw new Error(`API request failed with status ${response.status}`)
   }
 
-  const data = (await response.json()) as ZaiUsageResponse
-  const tokensLimit = data.data.limits.find((limit) => limit.type === "TOKENS_LIMIT")
+  // Read body as text first to handle potential empty responses gracefully.
+  // Pi v0.75.0 changed how fetch is implemented (removed globalThis.fetch override,
+  // routes through undici 8 dispatcher support) which can in edge cases produce
+  // an empty response body.
+  const bodyText = await response.text()
+  if (!bodyText) {
+    throw new Error("Z.ai API returned an empty response")
+  }
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(bodyText)
+  } catch {
+    throw new Error(`Z.ai API returned invalid JSON: ${bodyText.substring(0, 200)}`)
+  }
+
+  // Z.ai API can return HTTP 200 with an error body
+  // e.g. {"code":401,"msg":"token expired or incorrect","success":false}
+  const apiError = parsed as ZaiApiError
+  if (typeof apiError.success === "boolean" && !apiError.success && apiError.msg) {
+    throw new Error(`Z.ai API error: ${apiError.msg}`)
+  }
+
+  const data = parsed as ZaiUsageResponse
+  const tokensLimit = data.data?.limits?.find((limit) => limit.type === "TOKENS_LIMIT")
 
   if (!tokensLimit) {
     throw new Error("TOKENS_LIMIT not found in API response")
