@@ -314,4 +314,52 @@ describe("getZaiUsage", () => {
     expect(result.percentage).toBe(85)
     expect(result.resetTime).toBeDefined()
   })
+
+  it("should handle empty response body", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: new Headers(),
+        json: async () => {
+          throw new SyntaxError("Unexpected token '' in JSON")
+        },
+      } as unknown as Response),
+    )
+
+    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Failed to parse API response")
+  })
+
+  it("should handle invalid JSON response", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: new Headers(),
+        json: async () => {
+          throw new SyntaxError("Unexpected token < in JSON at position 0")
+        },
+      } as unknown as Response),
+    )
+
+    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Failed to parse API response")
+  })
+
+  it("should handle JSON parsing errors with context", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: new Headers(),
+        json: async () => {
+          throw new SyntaxError("Unexpected end of JSON input")
+        },
+      } as unknown as Response),
+    )
+
+    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Failed to parse API response")
+  })
 })

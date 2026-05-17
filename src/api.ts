@@ -47,7 +47,15 @@ export async function getZaiUsage(
     throw new Error(`API request failed with status ${response.status}`)
   }
 
-  const data = (await response.json()) as ZaiUsageResponse
+  let data: ZaiUsageResponse
+  try {
+    data = (await response.json()) as ZaiUsageResponse
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error("Failed to parse API response")
+    }
+    throw error
+  }
   const tokensLimit = data.data.limits.find((limit) => limit.type === "TOKENS_LIMIT")
 
   if (!tokensLimit) {
