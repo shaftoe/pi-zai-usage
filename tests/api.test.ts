@@ -5,6 +5,35 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
 import { getZaiUsage, type ZaiUsageResponse } from "../src/api"
 
+/**
+ * Helper to create a mock Response that uses json() (matching the production code path).
+ * Our production code reads the body via response.json(), which also properly
+ * handles Content-Encoding decompression in real fetch implementations.
+ */
+function mockOkResponse(body: unknown): Response {
+  return {
+    ok: true,
+    status: 200,
+    json: () => {
+      if (body === "") {
+        // Simulate what real fetch does for empty bodies
+        return Promise.reject(new SyntaxError("Unexpected end of JSON input"))
+      }
+      if (typeof body === "string") {
+        return Promise.reject(new SyntaxError(`${body} is not valid JSON`))
+      }
+      return Promise.resolve(body)
+    },
+  } as Response
+}
+
+function mockErrorResponse(status: number): Response {
+  return {
+    ok: false,
+    status,
+  } as Response
+}
+
 describe("getZaiUsage", () => {
   let mockModelRegistry: any
   let mockFetch: any
@@ -15,22 +44,19 @@ describe("getZaiUsage", () => {
       getApiKeyForProvider: async () => "test-api-key",
     }
 
-    // Mock global fetch
-    mockFetch = mock(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => ({
-          data: {
-            limits: [
-              {
-                type: "TOKENS_LIMIT",
-                percentage: 50,
-              },
-            ],
+    // Default mock: returns a valid usage response
+    const defaultResponse: ZaiUsageResponse = {
+      data: {
+        limits: [
+          {
+            type: "TOKENS_LIMIT",
+            percentage: 50,
           },
-        }),
-      } as Response),
-    )
+        ],
+      },
+    }
+
+    mockFetch = mock(() => Promise.resolve(mockOkResponse(defaultResponse)))
 
     global.fetch = mockFetch
   })
@@ -56,23 +82,13 @@ describe("getZaiUsage", () => {
   })
 
   it("should throw an error when API request fails with 401", async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: false,
-        status: 401,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockErrorResponse(401)))
 
     expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("API request failed with status 401")
   })
 
   it("should throw an error when API returns 500", async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: false,
-        status: 500,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockErrorResponse(500)))
 
     expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("API request failed with status 500")
   })
@@ -87,12 +103,7 @@ describe("getZaiUsage", () => {
       },
     }
 
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse(mockResponse)))
 
     expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("TOKENS_LIMIT not found in API response")
   })
@@ -109,12 +120,7 @@ describe("getZaiUsage", () => {
       },
     }
 
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse(mockResponse)))
 
     const result = await getZaiUsage(mockModelRegistry)
 
@@ -139,12 +145,7 @@ describe("getZaiUsage", () => {
       },
     }
 
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse(mockResponse)))
 
     const result = await getZaiUsage(mockModelRegistry)
 
@@ -167,12 +168,7 @@ describe("getZaiUsage", () => {
       },
     }
 
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse(mockResponse)))
 
     const result = await getZaiUsage(mockModelRegistry)
 
@@ -191,12 +187,7 @@ describe("getZaiUsage", () => {
       },
     }
 
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse(mockResponse)))
 
     const result = await getZaiUsage(mockModelRegistry)
 
@@ -221,10 +212,7 @@ describe("getZaiUsage", () => {
     mockFetch.mockImplementationOnce((url: string, options: RequestInit) => {
       fetchUrl = url
       fetchHeaders = options.headers
-      return Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response)
+      return Promise.resolve(mockOkResponse(mockResponse))
     })
 
     await getZaiUsage(mockModelRegistry)
@@ -233,6 +221,7 @@ describe("getZaiUsage", () => {
     expect(fetchHeaders).toBeDefined()
     const headers = fetchHeaders as Record<string, string>
     expect(headers.Authorization).toBe("Bearer test-api-key")
+    expect(headers["Accept-Encoding"]).toBe("identity")
   })
 
   it("should use the provided API key from model registry", async () => {
@@ -254,16 +243,14 @@ describe("getZaiUsage", () => {
 
     mockFetch.mockImplementationOnce((_url: string, options: RequestInit) => {
       fetchHeaders = options.headers
-      return Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response)
+      return Promise.resolve(mockOkResponse(mockResponse))
     })
 
     await getZaiUsage(mockModelRegistry)
 
     const headers = fetchHeaders as Record<string, string>
     expect(headers.Authorization).toBe(`Bearer ${customApiKey}`)
+    expect(headers["Accept-Encoding"]).toBe("identity")
   })
 
   it("should handle decimal percentage values", async () => {
@@ -278,12 +265,7 @@ describe("getZaiUsage", () => {
       },
     }
 
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse(mockResponse)))
 
     const result = await getZaiUsage(mockModelRegistry)
 
@@ -302,16 +284,55 @@ describe("getZaiUsage", () => {
       },
     }
 
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: async () => mockResponse,
-      } as Response),
-    )
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse(mockResponse)))
 
     const result = await getZaiUsage(mockModelRegistry)
 
     expect(result.percentage).toBe(85)
     expect(result.resetTime).toBeDefined()
+  })
+
+  // --- New tests for robustness against Pi v0.75.0 fetch changes ---
+
+  it("should throw a descriptive error when the response body is empty", async () => {
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse("")))
+
+    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API returned invalid JSON")
+  })
+
+  it("should throw a descriptive error when the response body is not valid JSON", async () => {
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse("this is not json")))
+
+    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API returned invalid JSON")
+  })
+
+  it("should throw when Z.ai API returns 200 with an auth error body", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve(
+        mockOkResponse({
+          code: 401,
+          msg: "token expired or incorrect",
+          success: false,
+        }),
+      ),
+    )
+
+    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow(
+      "Z.ai API error: token expired or incorrect",
+    )
+  })
+
+  it("should throw when Z.ai API returns 200 with a generic error body", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve(
+        mockOkResponse({
+          code: 429,
+          msg: "rate limit exceeded",
+          success: false,
+        }),
+      ),
+    )
+
+    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API error: rate limit exceeded")
   })
 })

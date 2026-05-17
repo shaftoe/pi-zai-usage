@@ -20,6 +20,12 @@ export interface ZaiUsageResponse {
   }
 }
 
+export interface ZaiApiError {
+  code: number
+  msg: string
+  success: boolean
+}
+
 export interface ZaiUsageData {
   percentage: number
   resetTime?: string
@@ -40,6 +46,10 @@ export async function getZaiUsage(
   const response = await fetch(ZAI_USAGE_API_URL, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
+      // Prevent gzip encoding: Pi v0.75.0 routes fetch() through undici's
+      // EnvHttpProxyAgent which fails to decompress gzip responses, causing
+      // response.json() to see garbled bytes and throw SyntaxError.
+      "Accept-Encoding": "identity",
     },
   })
 
@@ -47,8 +57,30 @@ export async function getZaiUsage(
     throw new Error(`API request failed with status ${response.status}`)
   }
 
-  const data = (await response.json()) as ZaiUsageResponse
-  const tokensLimit = data.data.limits.find((limit) => limit.type === "TOKENS_LIMIT")
+  // Pi v0.75.0 changed how fetch is implemented (removed globalThis.fetch override,
+  // routes through undici 8 dispatcher support) which can in edge cases produce
+  // an empty or malformed response body. We use response.json() which properly
+  // handles Content-Encoding (e.g. gzip decompression), unlike response.text()
+  // which would return raw compressed bytes as garbled text.
+  let parsed: unknown
+  try {
+    parsed = await response.json()
+  } catch (e) {
+    // response.json() throws SyntaxError for empty bodies ("" is not valid JSON)
+    // or for genuinely malformed JSON. Detect the empty-body case for clarity.
+    const message = e instanceof SyntaxError ? "empty or malformed response" : String(e)
+    throw new Error(`Z.ai API returned invalid JSON (${message})`)
+  }
+
+  // Z.ai API can return HTTP 200 with an error body
+  // e.g. {"code":401,"msg":"token expired or incorrect","success":false}
+  const apiError = parsed as ZaiApiError
+  if (typeof apiError.success === "boolean" && !apiError.success && apiError.msg) {
+    throw new Error(`Z.ai API error: ${apiError.msg}`)
+  }
+
+  const data = parsed as ZaiUsageResponse
+  const tokensLimit = data.data?.limits?.find((limit) => limit.type === "TOKENS_LIMIT")
 
   if (!tokensLimit) {
     throw new Error("TOKENS_LIMIT not found in API response")
