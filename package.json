@@ -43,7 +43,7 @@
     "typescript": "6.0.3"
   },
   "peerDependencies": {
-    "@earendil-works/pi-tui": "0.75.3"
+    "@earendil-works/pi-tui": "*"
   },
   "publishConfig": {
     "access": "public"
