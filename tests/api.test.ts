@@ -221,6 +221,7 @@ describe("getZaiUsage", () => {
     expect(fetchHeaders).toBeDefined()
     const headers = fetchHeaders as Record<string, string>
     expect(headers.Authorization).toBe("Bearer test-api-key")
+    expect(headers["Accept-Encoding"]).toBe("identity")
   })
 
   it("should use the provided API key from model registry", async () => {
@@ -249,6 +250,7 @@ describe("getZaiUsage", () => {
 
     const headers = fetchHeaders as Record<string, string>
     expect(headers.Authorization).toBe(`Bearer ${customApiKey}`)
+    expect(headers["Accept-Encoding"]).toBe("identity")
   })
 
   it("should handle decimal percentage values", async () => {

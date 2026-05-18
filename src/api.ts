@@ -46,6 +46,10 @@ export async function getZaiUsage(
   const response = await fetch(ZAI_USAGE_API_URL, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
+      // Prevent gzip encoding: Pi v0.75.0 routes fetch() through undici's
+      // EnvHttpProxyAgent which fails to decompress gzip responses, causing
+      // response.json() to see garbled bytes and throw SyntaxError.
+      "Accept-Encoding": "identity",
     },
   })
 
