@@ -6,16 +6,24 @@ import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
 import { getZaiUsage, type ZaiUsageResponse } from "../src/api"
 
 /**
- * Helper to create a mock Response that uses text() (matching the production code path).
- * Our production code reads the body via response.text() then JSON.parse(),
- * so the mock must provide text() — not json().
+ * Helper to create a mock Response that uses json() (matching the production code path).
+ * Our production code reads the body via response.json(), which also properly
+ * handles Content-Encoding decompression in real fetch implementations.
  */
 function mockOkResponse(body: unknown): Response {
-  const text = typeof body === "string" ? body : JSON.stringify(body)
   return {
     ok: true,
     status: 200,
-    text: () => Promise.resolve(text),
+    json: () => {
+      if (body === "") {
+        // Simulate what real fetch does for empty bodies
+        return Promise.reject(new SyntaxError("Unexpected end of JSON input"))
+      }
+      if (typeof body === "string") {
+        return Promise.reject(new SyntaxError(`${body} is not valid JSON`))
+      }
+      return Promise.resolve(body)
+    },
   } as Response
 }
 
@@ -287,11 +295,11 @@ describe("getZaiUsage", () => {
   it("should throw a descriptive error when the response body is empty", async () => {
     mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse("")))
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API returned an empty response")
+    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API returned invalid JSON")
   })
 
   it("should throw a descriptive error when the response body is not valid JSON", async () => {
-    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse("this is not json{{{")))
+    mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse("this is not json")))
 
     expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API returned invalid JSON")
   })

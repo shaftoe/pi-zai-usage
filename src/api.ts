@@ -53,20 +53,19 @@ export async function getZaiUsage(
     throw new Error(`API request failed with status ${response.status}`)
   }
 
-  // Read body as text first to handle potential empty responses gracefully.
   // Pi v0.75.0 changed how fetch is implemented (removed globalThis.fetch override,
   // routes through undici 8 dispatcher support) which can in edge cases produce
-  // an empty response body.
-  const bodyText = await response.text()
-  if (!bodyText) {
-    throw new Error("Z.ai API returned an empty response")
-  }
-
+  // an empty or malformed response body. We use response.json() which properly
+  // handles Content-Encoding (e.g. gzip decompression), unlike response.text()
+  // which would return raw compressed bytes as garbled text.
   let parsed: unknown
   try {
-    parsed = JSON.parse(bodyText)
-  } catch {
-    throw new Error(`Z.ai API returned invalid JSON: ${bodyText.substring(0, 200)}`)
+    parsed = await response.json()
+  } catch (e) {
+    // response.json() throws SyntaxError for empty bodies ("" is not valid JSON)
+    // or for genuinely malformed JSON. Detect the empty-body case for clarity.
+    const message = e instanceof SyntaxError ? "empty or malformed response" : String(e)
+    throw new Error(`Z.ai API returned invalid JSON (${message})`)
   }
 
   // Z.ai API can return HTTP 200 with an error body
