@@ -8,7 +8,7 @@ import type {
   ModelRegistry as PiModelRegistry,
 } from "@earendil-works/pi-coding-agent"
 import { Temporal } from "temporal-polyfill"
-import { getZaiUsage, type ZaiUsageData } from "./api"
+import { getZaiUsage, type ZaiUsageData, ZaiUsageError } from "./api"
 
 // Type for fetch usage function (same signature as getZaiUsage)
 export type FetchUsageFn = (
@@ -21,11 +21,16 @@ export class ZaiUsageCache {
   private lastFetchTime = 0
   private static readonly FETCH_COOLDOWN_MS = 30_000 // Only fetch every 30 seconds
 
+  /** Build the themed "Z.ai:" prefix used in all footer status strings */
+  private statusPrefix(theme: PiExtensionContext["ui"]["theme"]): string {
+    return theme.fg("muted", "Z.ai:")
+  }
+
   /** Build and set footer status string from usage data */
   private setStatusFromUsage(ctx: PiExtensionContext, usageData: ZaiUsageData): void {
     const theme = ctx.ui.theme
     const displayPercentage = Math.round(usageData.percentage * 10) / 10
-    let status = theme.fg("muted", "Z.ai:") + theme.fg("accent", `${displayPercentage}%`)
+    let status = this.statusPrefix(theme) + theme.fg("accent", `${displayPercentage}%`)
     if (usageData.resetTime && usageData.timeRemaining) {
       status += ` ${theme.fg("dim", `(${usageData.timeRemaining})`)}`
     }
@@ -56,8 +61,11 @@ export class ZaiUsageCache {
 
       this.setStatusFromUsage(ctx, usage)
     } catch (error) {
-      console.error(`Error updating Z.ai usage: ${error}`)
-      this.clear(ctx)
+      // Don't log raw errors to console — the footer already shows a short
+      // error code (e.g. <err:fetch>). Full errors are noisy in Pi's UI.
+      const code = error instanceof ZaiUsageError ? error.code : "fetch"
+      const theme = ctx.ui.theme
+      ctx.ui.setStatus("zai-usage", this.statusPrefix(theme) + theme.fg("error", `<err:${code}>`))
     }
   }
 

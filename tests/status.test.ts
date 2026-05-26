@@ -115,14 +115,14 @@ describe("ZaiUsageCache", () => {
       expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:accent:42.6%")
     })
 
-    it("should clear status on fetch error", async () => {
+    it("should show error footer on fetch error", async () => {
       const mockCtx = createMockContext()
-      const mockFetch = createThrowingFetchUsage("API error")
+      const mockFetch = createThrowingFetchUsage("Network error")
       const cache = createMockCache(mockFetch)
 
       await cache.updateStatus(mockCtx)
 
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:error:<err:fetch>")
     })
   })
 
@@ -220,44 +220,70 @@ describe("ZaiUsageCache", () => {
   })
 
   describe("error scenarios", () => {
-    it("should clear status on fetch error", async () => {
+    it("should show error footer for generic fetch errors", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("Network error")
       const cache = createMockCache(mockFetch)
 
       await cache.updateStatus(mockCtx)
 
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:error:<err:fetch>")
     })
 
-    it("should clear status on timeout error", async () => {
+    it("should show error footer with ZaiUsageError code", async () => {
+      const { ZaiUsageError } = await import("../src/api")
+      const mockCtx = createMockContext()
+      const mockFetch = mock(() => Promise.reject(new ZaiUsageError("API error", "http401"))) as any
+      const cache = createMockCache(mockFetch)
+
+      await cache.updateStatus(mockCtx)
+
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
+        "zai-usage",
+        "muted:Z.ai:error:<err:http401>",
+      )
+    })
+
+    it("should show error footer on timeout error", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("Request timeout")
       const cache = createMockCache(mockFetch)
 
       await cache.updateStatus(mockCtx)
 
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", "muted:Z.ai:error:<err:fetch>")
     })
 
-    it("should handle API returning 401 unauthorized", async () => {
+    it("should show http401 error footer on API 401", async () => {
+      const { ZaiUsageError } = await import("../src/api")
       const mockCtx = createMockContext()
-      const mockFetch = createThrowingFetchUsage("API request failed with status 401")
+      const mockFetch = mock(() =>
+        Promise.reject(new ZaiUsageError("API request failed with status 401", "http401")),
+      ) as any
       const cache = createMockCache(mockFetch)
 
       await cache.updateStatus(mockCtx)
 
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
+        "zai-usage",
+        "muted:Z.ai:error:<err:http401>",
+      )
     })
 
-    it("should handle API returning 500 server error", async () => {
+    it("should show http500 error footer on API 500", async () => {
+      const { ZaiUsageError } = await import("../src/api")
       const mockCtx = createMockContext()
-      const mockFetch = createThrowingFetchUsage("API request failed with status 500")
+      const mockFetch = mock(() =>
+        Promise.reject(new ZaiUsageError("API request failed with status 500", "http500")),
+      ) as any
       const cache = createMockCache(mockFetch)
 
       await cache.updateStatus(mockCtx)
 
-      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith("zai-usage", undefined)
+      expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
+        "zai-usage",
+        "muted:Z.ai:error:<err:http500>",
+      )
     })
 
     it("should not throw errors, catch them silently", async () => {
@@ -270,7 +296,7 @@ describe("ZaiUsageCache", () => {
       await expect(result).toBeUndefined()
     })
 
-    it("should log error to console on fetch error", async () => {
+    it("should NOT log error to console on fetch error", async () => {
       const mockCtx = createMockContext()
       const mockFetch = createThrowingFetchUsage("API request failed")
       const cache = createMockCache(mockFetch)
@@ -284,12 +310,13 @@ describe("ZaiUsageCache", () => {
       try {
         await cache.updateStatus(mockCtx)
 
-        expect(mockConsoleError).toHaveBeenCalled()
-        const calls = mockConsoleError.mock.calls as Array<unknown[]>
-        expect(calls.length).toBeGreaterThan(0)
-        const errorMessage = calls[0]?.[0] as string
-        expect(errorMessage).toContain("Error updating Z.ai usage:")
-        expect(errorMessage).toContain("API request failed")
+        // Errors should only be shown in the footer, not dumped to console
+        expect(mockConsoleError).not.toHaveBeenCalled()
+        // Footer should show the error code
+        expect(mockCtx.ui.setStatus).toHaveBeenCalledWith(
+          "zai-usage",
+          "muted:Z.ai:error:<err:fetch>",
+        )
       } finally {
         console.error = originalConsoleError
       }

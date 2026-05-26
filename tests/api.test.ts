@@ -3,7 +3,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
-import { getZaiUsage, type ZaiUsageResponse } from "../src/api"
+import { getZaiUsage, ZaiUsageError, type ZaiUsageResponse } from "../src/api"
 
 /**
  * Helper to create a mock Response that uses json() (matching the production code path).
@@ -65,32 +65,83 @@ describe("getZaiUsage", () => {
     mockFetch.mockRestore()
   })
 
-  it("should throw an error when API key is missing", async () => {
+  it("should make the request without Authorization header when no API key (proxy mode)", async () => {
     mockModelRegistry.getApiKeyForProvider = async () => null
+    let fetchHeaders: any
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow(
-      "Missing Z.ai API credentials. Run /login for Z.ai.",
-    )
+    mockFetch.mockImplementationOnce((_url: string, options: RequestInit) => {
+      fetchHeaders = options.headers
+      return Promise.resolve(
+        mockOkResponse({ data: { limits: [{ type: "TOKENS_LIMIT", percentage: 50 }] } }),
+      )
+    })
+
+    const result = await getZaiUsage(mockModelRegistry)
+    expect(result.percentage).toBe(50)
+    const headers = fetchHeaders as Record<string, string>
+    expect(headers.Authorization).toBeUndefined()
+    expect(headers["Accept-Encoding"]).toBe("identity")
   })
 
-  it("should throw an error when API key is empty string", async () => {
+  it("should make the request without Authorization header for empty string key (proxy mode)", async () => {
     mockModelRegistry.getApiKeyForProvider = async () => ""
+    let fetchHeaders: any
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow(
-      "Missing Z.ai API credentials. Run /login for Z.ai.",
-    )
+    mockFetch.mockImplementationOnce((_url: string, options: RequestInit) => {
+      fetchHeaders = options.headers
+      return Promise.resolve(
+        mockOkResponse({ data: { limits: [{ type: "TOKENS_LIMIT", percentage: 30 }] } }),
+      )
+    })
+
+    const result = await getZaiUsage(mockModelRegistry)
+    expect(result.percentage).toBe(30)
+    const headers = fetchHeaders as Record<string, string>
+    expect(headers.Authorization).toBeUndefined()
+  })
+
+  it("should make the request without Authorization header when key is the proxy sentinel", async () => {
+    mockModelRegistry.getApiKeyForProvider = async () => "proxy-managed"
+    let fetchHeaders: any
+
+    mockFetch.mockImplementationOnce((_url: string, options: RequestInit) => {
+      fetchHeaders = options.headers
+      return Promise.resolve(
+        mockOkResponse({ data: { limits: [{ type: "TOKENS_LIMIT", percentage: 70 }] } }),
+      )
+    })
+
+    const result = await getZaiUsage(mockModelRegistry)
+    expect(result.percentage).toBe(70)
+    const headers = fetchHeaders as Record<string, string>
+    expect(headers.Authorization).toBeUndefined()
+    expect(headers["Accept-Encoding"]).toBe("identity")
   })
 
   it("should throw an error when API request fails with 401", async () => {
     mockFetch.mockImplementationOnce(() => Promise.resolve(mockErrorResponse(401)))
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("API request failed with status 401")
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toBe("API request failed with status 401")
+      expect((e as ZaiUsageError).code).toBe("http401")
+    }
   })
 
   it("should throw an error when API returns 500", async () => {
     mockFetch.mockImplementationOnce(() => Promise.resolve(mockErrorResponse(500)))
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("API request failed with status 500")
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toBe("API request failed with status 500")
+      expect((e as ZaiUsageError).code).toBe("http500")
+    }
   })
 
   it("should throw an error when TOKENS_LIMIT is not found in response", async () => {
@@ -105,7 +156,14 @@ describe("getZaiUsage", () => {
 
     mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse(mockResponse)))
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("TOKENS_LIMIT not found in API response")
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toBe("TOKENS_LIMIT not found in API response")
+      expect((e as ZaiUsageError).code).toBe("nolimit")
+    }
   })
 
   it("should return usage data without reset time when nextResetTime is missing", async () => {
@@ -297,13 +355,27 @@ describe("getZaiUsage", () => {
   it("should throw a descriptive error when the response body is empty", async () => {
     mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse("")))
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API returned invalid JSON")
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toContain("Z.ai API returned invalid JSON")
+      expect((e as ZaiUsageError).code).toBe("badjson")
+    }
   })
 
   it("should throw a descriptive error when the response body is not valid JSON", async () => {
     mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse("this is not json")))
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API returned invalid JSON")
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toContain("Z.ai API returned invalid JSON")
+      expect((e as ZaiUsageError).code).toBe("badjson")
+    }
   })
 
   it("should throw when Z.ai API returns 200 with an auth error body", async () => {
@@ -317,9 +389,47 @@ describe("getZaiUsage", () => {
       ),
     )
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow(
-      "Z.ai API error: token expired or incorrect",
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toBe("Z.ai API error: token expired or incorrect")
+      expect((e as ZaiUsageError).code).toBe("api401")
+    }
+  })
+
+  it("should default to 'unknown' when API error body has no code field", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve(
+        mockOkResponse({
+          msg: "something went wrong",
+          success: false,
+        }),
+      ),
     )
+
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toBe("Z.ai API error: something went wrong")
+      expect((e as ZaiUsageError).code).toBe("apiunknown")
+    }
+  })
+
+  it("should wrap network-level fetch errors as ZaiUsageError", async () => {
+    mockFetch.mockImplementationOnce(() => Promise.reject(new TypeError("fetch failed")))
+
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toContain("Network error: fetch failed")
+      expect((e as ZaiUsageError).code).toBe("fetch")
+    }
   })
 
   it("should throw when Z.ai API returns 200 with a generic error body", async () => {
@@ -333,6 +443,13 @@ describe("getZaiUsage", () => {
       ),
     )
 
-    expect(getZaiUsage(mockModelRegistry)).rejects.toThrow("Z.ai API error: rate limit exceeded")
+    try {
+      await getZaiUsage(mockModelRegistry)
+      expect.unreachable("should have thrown")
+    } catch (e) {
+      expect(e).toBeInstanceOf(ZaiUsageError)
+      expect((e as ZaiUsageError).message).toBe("Z.ai API error: rate limit exceeded")
+      expect((e as ZaiUsageError).code).toBe("api429")
+    }
   })
 })
