@@ -10,7 +10,7 @@ import { Temporal } from "temporal-polyfill"
  */
 export function formatInstantFromEpochMs(ms: number): string {
   const instant = Temporal.Instant.fromEpochMilliseconds(ms)
-  const zonedDateTime = instant.toZonedDateTimeISO(Temporal.Now.timeZoneId())
+  const zonedDateTime = instant.toZonedDateTimeISO(Temporal.Now.timeZoneId() ?? "UTC")
   return zonedDateTime.toLocaleString(undefined, {
     weekday: "short",
     day: "2-digit",
