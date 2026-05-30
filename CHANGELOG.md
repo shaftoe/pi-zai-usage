@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-05-30
+
+### Changed
+
+- use @alexanderfortin/pi-usage-lib shared library (#38)
+
+### Fixed
+
+- fix ts type issue
+
 ## [0.2.1] - 2026-05-29
 
 ### Changed
@@ -117,7 +127,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enabled full OIDC publishing (no NPM_TOKEN required)
 
-[unreleased]: https://github.com/shaftoe/pi-zai-usage/compare/v0.2.1...HEAD
+[unreleased]: https://github.com/shaftoe/pi-zai-usage/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/shaftoe/pi-zai-usage/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/shaftoe/pi-zai-usage/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/shaftoe/pi-zai-usage/compare/v0.1.14...v0.2.0
 [0.1.14]: https://github.com/shaftoe/pi-zai-usage/compare/v0.1.13...v0.1.14
