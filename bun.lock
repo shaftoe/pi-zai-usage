@@ -5,8 +5,8 @@
     "": {
       "name": "@alexanderfortin/pi-zai-usage",
       "dependencies": {
+        "@alexanderfortin/pi-usage-lib": "0.0.1",
         "@earendil-works/pi-coding-agent": "0.77.0",
-        "@sinclair/typebox": "0.34.49",
         "temporal-polyfill": "0.3.2",
       },
       "devDependencies": {
@@ -34,6 +34,8 @@
     "@actions/http-client": ["@actions/http-client@4.0.0", "", { "dependencies": { "tunnel": "^0.0.6", "undici": "^6.23.0" } }, "sha512-QuwPsgVMsD6qaPD57GLZi9sqzAZCtiJT8kVBCDpLtxhL5MydQ4gS+DrejtZZPdIYyB1e95uCK9Luyds7ybHI3g=="],
 
     "@actions/io": ["@actions/io@3.0.2", "", {}, "sha512-nRBchcMM+QK1pdjO7/idu86rbJI5YHUKCvKs0KxnSYbVe3F51UfGxuZX4Qy/fWlp6l7gWFwIkrOzN+oUK03kfw=="],
+
+    "@alexanderfortin/pi-usage-lib": ["@alexanderfortin/pi-usage-lib@0.0.1", "", { "dependencies": { "@earendil-works/pi-coding-agent": "0.77.0", "temporal-polyfill": "0.3.2" }, "peerDependencies": { "@earendil-works/pi-tui": "*" } }, "sha512-In0JDw8mCsyl0Jb0wIwtWurmKdxifqiVIsbDm1Z6PbfEz6JnmR6m9AKSRWgtGCyaWgbOYwtfEPKSydoPRkYtPQ=="],
 
     "@alexanderfortin/semantic-release-keep-a-changelog": ["@alexanderfortin/semantic-release-keep-a-changelog@0.2.3", "", { "dependencies": { "@semantic-release/error": "^4.0.0", "conventional-changelog-writer": "8.4.0", "conventional-commits-filter": "^5.0.0", "conventional-commits-parser": "6.4.0", "get-stream": "9.0.1", "into-stream": "^9.1.0", "temporal-polyfill": "^0.3.2" }, "peerDependencies": { "semantic-release": ">=24.0.0" } }, "sha512-okx1pZPHn5nlimMIIhOwb0/u0ndZNf75Mglv3UBiwVfJy7uuWEfVcLmUxsTkW5O630mw1tzcU1RZgkYdqBJhVQ=="],
 
@@ -218,8 +220,6 @@
     "@silvia-odwyer/photon-node": ["@silvia-odwyer/photon-node@0.3.4", "", {}, "sha512-bnly4BKB3KDTFxrUIcgCLbaeVVS8lrAkri1pEzskpmxu9MdfGQTy8b8EgcD83ywD3RPMsIulY8xJH5Awa+t9fA=="],
 
     "@simple-libs/stream-utils": ["@simple-libs/stream-utils@1.2.0", "", {}, "sha512-KxXvfapcixpz6rVEB6HPjOUZT22yN6v0vI0urQSk1L8MlEWPDFCZkhw2xmkyoTGYeFw7tWTZd7e3lVzRZRN/EA=="],
-
-    "@sinclair/typebox": ["@sinclair/typebox@0.34.49", "", {}, "sha512-brySQQs7Jtn0joV8Xh9ZV/hZb9Ozb0pmazDIASBkYKCjXrXU3mpcFahmK/z4YDhGkQvP9mWJbVyahdtU5wQA+A=="],
 
     "@sindresorhus/is": ["@sindresorhus/is@4.6.0", "", {}, "sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw=="],
 

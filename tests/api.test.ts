@@ -1,14 +1,16 @@
 /**
- * Unit tests for api.ts
+ * Unit tests for api.ts — Z.ai-specific API logic
+ *
+ * Tests the Z.ai getZaiUsage function which composes shared library
+ * primitives (buildAuthHeaders, safeFetch, safeParseJson, UsageError)
+ * with Z.ai-specific response parsing.
  */
 
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
-import { getZaiUsage, ZaiUsageError, type ZaiUsageResponse } from "../src/api"
+import { getZaiUsage, UsageError, type ZaiUsageResponse } from "../src/api"
 
 /**
  * Helper to create a mock Response that uses json() (matching the production code path).
- * Our production code reads the body via response.json(), which also properly
- * handles Content-Encoding decompression in real fetch implementations.
  */
 function mockOkResponse(body: unknown): Response {
   return {
@@ -16,7 +18,6 @@ function mockOkResponse(body: unknown): Response {
     status: 200,
     json: () => {
       if (body === "") {
-        // Simulate what real fetch does for empty bodies
         return Promise.reject(new SyntaxError("Unexpected end of JSON input"))
       }
       if (typeof body === "string") {
@@ -39,12 +40,10 @@ describe("getZaiUsage", () => {
   let mockFetch: any
 
   beforeEach(() => {
-    // Create a fresh mock for each test
     mockModelRegistry = {
       getApiKeyForProvider: async () => "test-api-key",
     }
 
-    // Default mock: returns a valid usage response
     const defaultResponse: ZaiUsageResponse = {
       data: {
         limits: [
@@ -57,7 +56,6 @@ describe("getZaiUsage", () => {
     }
 
     mockFetch = mock(() => Promise.resolve(mockOkResponse(defaultResponse)))
-
     global.fetch = mockFetch
   })
 
@@ -125,9 +123,9 @@ describe("getZaiUsage", () => {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toBe("API request failed with status 401")
-      expect((e as ZaiUsageError).code).toBe("http401")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toBe("API request failed with status 401")
+      expect((e as UsageError).code).toBe("http401")
     }
   })
 
@@ -138,9 +136,9 @@ describe("getZaiUsage", () => {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toBe("API request failed with status 500")
-      expect((e as ZaiUsageError).code).toBe("http500")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toBe("API request failed with status 500")
+      expect((e as UsageError).code).toBe("http500")
     }
   })
 
@@ -160,9 +158,9 @@ describe("getZaiUsage", () => {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toBe("TOKENS_LIMIT not found in API response")
-      expect((e as ZaiUsageError).code).toBe("nolimit")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toBe("TOKENS_LIMIT not found in API response")
+      expect((e as UsageError).code).toBe("nolimit")
     }
   })
 
@@ -350,8 +348,6 @@ describe("getZaiUsage", () => {
     expect(result.resetTime).toBeDefined()
   })
 
-  // --- New tests for robustness against Pi v0.75.0 fetch changes ---
-
   it("should throw a descriptive error when the response body is empty", async () => {
     mockFetch.mockImplementationOnce(() => Promise.resolve(mockOkResponse("")))
 
@@ -359,9 +355,9 @@ describe("getZaiUsage", () => {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toContain("Z.ai API returned invalid JSON")
-      expect((e as ZaiUsageError).code).toBe("badjson")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toContain("API returned invalid JSON")
+      expect((e as UsageError).code).toBe("badjson")
     }
   })
 
@@ -372,9 +368,9 @@ describe("getZaiUsage", () => {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toContain("Z.ai API returned invalid JSON")
-      expect((e as ZaiUsageError).code).toBe("badjson")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toContain("API returned invalid JSON")
+      expect((e as UsageError).code).toBe("badjson")
     }
   })
 
@@ -393,9 +389,9 @@ describe("getZaiUsage", () => {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toBe("Z.ai API error: token expired or incorrect")
-      expect((e as ZaiUsageError).code).toBe("api401")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toBe("Z.ai API error: token expired or incorrect")
+      expect((e as UsageError).code).toBe("api401")
     }
   })
 
@@ -413,22 +409,22 @@ describe("getZaiUsage", () => {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toBe("Z.ai API error: something went wrong")
-      expect((e as ZaiUsageError).code).toBe("apiunknown")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toBe("Z.ai API error: something went wrong")
+      expect((e as UsageError).code).toBe("apiunknown")
     }
   })
 
-  it("should wrap network-level fetch errors as ZaiUsageError", async () => {
+  it("should wrap network-level fetch errors as UsageError", async () => {
     mockFetch.mockImplementationOnce(() => Promise.reject(new TypeError("fetch failed")))
 
     try {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toContain("Network error: fetch failed")
-      expect((e as ZaiUsageError).code).toBe("fetch")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toContain("Network error: fetch failed")
+      expect((e as UsageError).code).toBe("fetch")
     }
   })
 
@@ -447,9 +443,9 @@ describe("getZaiUsage", () => {
       await getZaiUsage(mockModelRegistry)
       expect.unreachable("should have thrown")
     } catch (e) {
-      expect(e).toBeInstanceOf(ZaiUsageError)
-      expect((e as ZaiUsageError).message).toBe("Z.ai API error: rate limit exceeded")
-      expect((e as ZaiUsageError).code).toBe("api429")
+      expect(e).toBeInstanceOf(UsageError)
+      expect((e as UsageError).message).toBe("Z.ai API error: rate limit exceeded")
+      expect((e as UsageError).code).toBe("api429")
     }
   })
 })
