@@ -26,12 +26,12 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "dependencies": {
-    "@alexanderfortin/pi-usage-lib": "0.0.1",
+    "@alexanderfortin/pi-usage-lib": "^0.0.2",
     "@earendil-works/pi-coding-agent": "*",
     "temporal-polyfill": "0.3.2"
   },
   "devDependencies": {
-    "@alexanderfortin/semantic-release-keep-a-changelog": "0.2.3",
+    "@alexanderfortin/semantic-release-keep-a-changelog": "^0.3.0",
     "@biomejs/biome": "2.4.16",
     "@semantic-release/commit-analyzer": "13.0.1",
     "@semantic-release/exec": "7.1.0",
