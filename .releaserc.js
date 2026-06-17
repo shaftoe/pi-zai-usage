@@ -38,4 +38,4 @@ export default {
     ],
   ],
   tagFormat: "v${version}",
-};
+}

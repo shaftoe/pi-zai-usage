@@ -5,13 +5,13 @@
  * event registration, provider matching, caching, and footer lifecycle.
  */
 
-import { createUsageExtension, type Theme } from "@alexanderfortin/pi-usage-lib"
+import { colorForPercentage, createUsageExtension, type Theme } from "@alexanderfortin/pi-usage-lib"
 import { getZaiUsage, type ZaiUsageData } from "./api"
 
 /** Render Z.ai usage data into a themed footer string */
 function renderZaiStatus(data: ZaiUsageData, theme: Theme): string {
   const displayPercentage = Math.round(data.percentage * 10) / 10
-  let status = theme.fg("muted", "Z.ai:") + theme.fg("accent", `${displayPercentage}%`)
+  let status = `${theme.fg("muted", "Z.ai:") + colorForPercentage(displayPercentage, theme)}%`
   if (data.resetTime && data.timeRemaining) {
     status += ` ${theme.fg("dim", `(${data.timeRemaining})`)}`
   }
