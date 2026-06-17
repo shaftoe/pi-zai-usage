@@ -9,9 +9,9 @@ import { colorForPercentage, createUsageExtension, type Theme } from "@alexander
 import { getZaiUsage, type ZaiUsageData } from "./api"
 
 /** Render Z.ai usage data into a themed footer string */
-function renderZaiStatus(data: ZaiUsageData, theme: Theme): string {
+export function renderZaiStatus(data: ZaiUsageData, theme: Theme): string {
   const displayPercentage = Math.round(data.percentage * 10) / 10
-  let status = `${theme.fg("muted", "Z.ai:") + colorForPercentage(displayPercentage, theme)}%`
+  let status = `${theme.fg("muted", "Z.ai:")}${colorForPercentage(displayPercentage, theme)(`${displayPercentage}%`)}`
   if (data.resetTime && data.timeRemaining) {
     status += ` ${theme.fg("dim", `(${data.timeRemaining})`)}`
   }
