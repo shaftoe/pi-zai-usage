@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@alexanderfortin/pi-usage-lib": "^0.2.0",
-    "temporal-polyfill": "^0.3.2"
+    "temporal-polyfill": "^1.0.1"
   },
   "devDependencies": {
     "@alexanderfortin/semantic-release-keep-a-changelog": "^0.4.2",
@@ -42,8 +42,8 @@
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "^0.79.6",
-    "@earendil-works/pi-tui": "^0.79.6"
+    "@earendil-works/pi-coding-agent": "^0.79.7",
+    "@earendil-works/pi-tui": "^0.79.7"
   },
   "publishConfig": {
     "access": "public"
