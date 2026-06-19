@@ -26,7 +26,7 @@
     "release:dry-run": "semantic-release --dry-run"
   },
   "dependencies": {
-    "@alexanderfortin/pi-usage-lib": "^0.1.0",
+    "@alexanderfortin/pi-usage-lib": "^0.2.0",
     "temporal-polyfill": "^0.3.2"
   },
   "devDependencies": {
