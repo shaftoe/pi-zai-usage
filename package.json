@@ -42,8 +42,8 @@
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "^0.79.9",
-    "@earendil-works/pi-tui": "^0.79.9"
+    "@earendil-works/pi-coding-agent": "^0.79.10",
+    "@earendil-works/pi-tui": "^0.79.10"
   },
   "publishConfig": {
     "access": "public"
