@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@alexanderfortin/pi-usage-lib": "^0.2.9",
-    "temporal-polyfill": "^1.0.4"
+    "temporal-polyfill": "^1.0.5"
   },
   "devDependencies": {
     "@alexanderfortin/semantic-release-keep-a-changelog": "^0.4.13",
