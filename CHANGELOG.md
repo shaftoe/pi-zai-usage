@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-25
+
+### Added
+
+- replace Bun with PNPM
+
+### Changed
+
+- **deps**: update dependencies (#58)
+- **deps**: update dependencies (#60)
+- **deps-dev**: update dependencies (#61)
+- **deps-dev**: update dependencies (#62)
+- **deps-dev**: update dependencies (#63)
+- **deps**: update dependencies, Pi to v0.87.1 (#64)
+
 ## [0.4.0] - 2026-08-09
 
 ### Added
@@ -171,7 +186,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enabled full OIDC publishing (no NPM_TOKEN required)
 
-[unreleased]: https://github.com/shaftoe/pi-zai-usage/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/shaftoe/pi-zai-usage/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/shaftoe/pi-zai-usage/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/shaftoe/pi-zai-usage/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/shaftoe/pi-zai-usage/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/shaftoe/pi-zai-usage/compare/v0.3.0...v0.3.1
