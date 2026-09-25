@@ -12,7 +12,7 @@
  *   TIME_LIMIT   unit 5 = monthly web-tool budget
  */
 
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { getZaiUsage, UsageError, type ZaiUsageResponse } from "../src/api"
 
 /**
@@ -78,7 +78,7 @@ describe("getZaiUsage", () => {
       getApiKeyForProvider: async () => "test-api-key",
     }
 
-    mockFetch = mock(() => Promise.resolve(mockOkResponse(fullResponse())))
+    mockFetch = vi.fn(() => Promise.resolve(mockOkResponse(fullResponse())))
     global.fetch = mockFetch
   })
 

@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "./",
-    "types": ["@types/bun"]
+    "types": ["node"]
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist", "coverage"]

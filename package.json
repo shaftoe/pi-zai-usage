@@ -11,22 +11,23 @@
       "import": "./dist/index.js"
     }
   },
+  "packageManager": "pnpm@12.6.0",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "build": "bun run typecheck && bun run build:tsc",
+    "dev": "node --watch --experimental-strip-types src/index.ts",
+    "build": "pnpm run typecheck && pnpm run build:tsc",
     "build:tsc": "tsc",
     "typecheck": "tsc --noEmit --project tsconfig.test.json",
     "lint": "biome check src/ tests/",
     "lint:fix": "biome check --write src/ tests/",
     "format": "biome format --write src/",
-    "check": "bun run typecheck && bun run lint",
-    "test": "bun test",
-    "test:coverage": "bun test --coverage --coverage-reporter=lcov",
+    "check": "pnpm run typecheck && pnpm run lint",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage --coverage.reporter=lcov",
     "release": "semantic-release",
     "release:dry-run": "semantic-release --dry-run"
   },
   "dependencies": {
-    "@alexanderfortin/pi-usage-lib": "^0.2.13",
+    "@alexanderfortin/pi-usage-lib": "^0.3.1",
     "temporal-polyfill": "^1.0.5"
   },
   "devDependencies": {
@@ -37,9 +38,11 @@
     "@semantic-release/git": "^11.0.1",
     "@semantic-release/github": "^12.0.10",
     "@semantic-release/npm": "^13.2.0",
-    "@types/bun": "^1.4.2",
+    "@types/node": "^26.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
     "semantic-release": "^25.0.9",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.0.0"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "^0.87.1",

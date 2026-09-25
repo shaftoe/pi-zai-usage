@@ -14,8 +14,8 @@
  * absent.
  */
 
-import { describe, expect, it } from "bun:test"
 import { colorForPercentage, loadColorThresholds, type Theme } from "@alexanderfortin/pi-usage-lib"
+import { describe, expect, it } from "vitest"
 import type { ZaiUsageData } from "../src/api"
 import { renderZaiStatus } from "../src/index"
 

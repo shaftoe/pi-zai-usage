@@ -31,10 +31,10 @@ git clone https://github.com/shaftoe/pi-zai-usage
 cd pi-zai-usage
 
 # Install dependencies
-bun install
+pnpm install
 
 # Build the extension
-bun run build
+pnpm run build
 
 # Install the extension
 pi install ./
@@ -44,28 +44,29 @@ pi install ./
 
 This project uses modern TypeScript development tooling:
 
-- **Bun** - Fast package manager and runtime
+- **pnpm** - Fast, disk-efficient package manager
+- **Node.js** - JavaScript runtime
 - **TypeScript 6** - Static type checking with strict mode enabled
 - **Biome** - Ultra-fast linter and formatter
 
 ```bash
 # Type check
-bun run typecheck
+pnpm run typecheck
 
 # Lint code
-bun run lint
+pnpm run lint
 
 # Auto-fix lint issues
-bun run lint:fix
+pnpm run lint:fix
 
 # Format code
-bun run format
+pnpm run format
 
 # Run all checks
-bun run check
+pnpm run check
 
 # Watch mode for development
-bun run dev
+pnpm run dev
 ```
 
 ## Usage

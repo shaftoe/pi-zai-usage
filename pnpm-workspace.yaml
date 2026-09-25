@@ -1,0 +1,6 @@
+allowBuilds:
+  "@google/genai": true
+  esbuild: true
+  protobufjs: true
+minimumReleaseAgeExclude:
+  - '@alexanderfortin/pi-usage-lib@0.3.1'
