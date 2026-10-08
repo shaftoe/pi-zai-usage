@@ -168,13 +168,13 @@ importers:
     dependencies:
       '@alexanderfortin/pi-usage-lib':
         specifier: ^0.3.1
-        version: 0.3.1(@earendil-works/pi-coding-agent@0.87.1(supports-color@7.2.0)(ws@8.21.3))(@earendil-works/pi-tui@0.87.1)
+        version: 0.3.1(@earendil-works/pi-coding-agent@0.87.1(supports-color@7.2.0)(ws@8.21.3))(@earendil-works/pi-tui@0.99.2)
       '@earendil-works/pi-coding-agent':
         specifier: ^0.87.1
         version: 0.87.1(supports-color@7.2.0)(ws@8.21.3)
       '@earendil-works/pi-tui':
-        specifier: ^0.87.1
-        version: 0.87.1
+        specifier: ^0.99.2
+        version: 0.99.2
       temporal-polyfill:
         specifier: ^1.0.5
         version: 1.0.5
@@ -449,6 +449,10 @@ packages:
 
   '@earendil-works/pi-tui@0.87.1':
     resolution: {integrity: sha512-YEH2vRyOeiO7hhN6j6AE6YwKSq2Kz2f3XR8bj1TbR+aGE/JsnY1hLPMI2pvaZfRM1n9Y00tejxFQ4zbzvF7nkQ==}
+    engines: {node: '>=22.19.0'}
+
+  '@earendil-works/pi-tui@0.99.2':
+    resolution: {integrity: sha512-IOcNnd390NCIwBEKeOiBK/bvaR7Z+vEsvB5TtKsFdsY/vAZE6qRHbQqt6jpTefTiKPfQlwG8eS1BU42DeG2v4w==}
     engines: {node: '>=22.19.0'}
 
   '@esbuild/aix-ppc64@0.28.2':
@@ -2689,10 +2693,10 @@ snapshots:
 
   '@actions/io@3.0.2': {}
 
-  '@alexanderfortin/pi-usage-lib@0.3.1(@earendil-works/pi-coding-agent@0.87.1(supports-color@7.2.0)(ws@8.21.3))(@earendil-works/pi-tui@0.87.1)':
+  '@alexanderfortin/pi-usage-lib@0.3.1(@earendil-works/pi-coding-agent@0.87.1(supports-color@7.2.0)(ws@8.21.3))(@earendil-works/pi-tui@0.99.2)':
     dependencies:
       '@earendil-works/pi-coding-agent': 0.87.1(supports-color@7.2.0)(ws@8.21.3)
-      '@earendil-works/pi-tui': 0.87.1
+      '@earendil-works/pi-tui': 0.99.2
       temporal-polyfill: 1.0.5
 
   '@alexanderfortin/semantic-release-keep-a-changelog@0.4.14(semantic-release@25.0.9(supports-color@7.2.0)(typescript@7.0.2))':
@@ -3032,6 +3036,11 @@ snapshots:
   '@earendil-works/pi-telemetry@0.87.1': {}
 
   '@earendil-works/pi-tui@0.87.1':
+    dependencies:
+      get-east-asian-width: 1.6.0
+      marked: 18.0.11
+
+  '@earendil-works/pi-tui@0.99.2':
     dependencies:
       get-east-asian-width: 1.6.0
       marked: 18.0.11
