@@ -204,7 +204,7 @@ importers:
         specifier: ^26.0.0
         version: 26.6.2
       '@vitest/coverage-v8':
-        specifier: ^4.0.0
+        specifier: ^4.1.11
         version: 4.1.11(vitest@4.1.11)
       semantic-release:
         specifier: ^25.0.9
@@ -213,7 +213,7 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vitest:
-        specifier: ^4.0.0
+        specifier: ^4.1.11
         version: 4.1.11(@types/node@26.6.2)(@vitest/coverage-v8@4.1.11)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
 
 packages:
