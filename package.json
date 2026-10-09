@@ -11,7 +11,7 @@
       "import": "./dist/index.js"
     }
   },
-  "packageManager": "pnpm@12.6.0",
+  "packageManager": "pnpm@12.10.1",
   "scripts": {
     "dev": "node --watch --experimental-strip-types src/index.ts",
     "build": "pnpm run typecheck && pnpm run build:tsc",
