@@ -46,7 +46,7 @@
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "^0.87.1",
-    "@earendil-works/pi-tui": "^0.87.1"
+    "@earendil-works/pi-tui": "^1.1.0"
   },
   "publishConfig": {
     "access": "public"
