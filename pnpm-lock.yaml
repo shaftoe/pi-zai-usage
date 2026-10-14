@@ -180,8 +180,8 @@ importers:
         version: 1.0.5
     devDependencies:
       '@alexanderfortin/semantic-release-keep-a-changelog':
-        specifier: ^0.5.1
-        version: 0.5.1(semantic-release@25.0.9(supports-color@7.2.0)(typescript@7.0.2))
+        specifier: ^0.6.0
+        version: 0.6.0(semantic-release@25.0.9(supports-color@7.2.0)(typescript@7.0.2))
       '@biomejs/biome':
         specifier: ^2.5.15
         version: 2.5.15
@@ -237,11 +237,11 @@ packages:
       '@earendil-works/pi-coding-agent': ^0.87.1
       '@earendil-works/pi-tui': ^0.87.1
 
-  '@alexanderfortin/semantic-release-keep-a-changelog@0.5.1':
-    resolution: {integrity: sha512-Ij0xzVQJA62I03GSolyDj5MTTsAKbdCUlVZf3cVghXS4O49TaRr8HobsbC/4Ax6lq0zRCckmW5fPiOtPf7JBUA==}
+  '@alexanderfortin/semantic-release-keep-a-changelog@0.6.0':
+    resolution: {integrity: sha512-MS+/+kt0QJ8qbOpUPEabcs8TTIZCQVal8hT/B+28kxr89Ua7jHpaOYNaRDle1hZ51bkfH2/smjAfYRL7VlRENQ==}
     engines: {pnpm: '>=12.11.2'}
     peerDependencies:
-      semantic-release: '>=24.2.9'
+      semantic-release: '>=25.0.9'
 
   '@anthropic-ai/sdk@0.129.0':
     resolution: {integrity: sha512-MH7LB20kNpGLUpPTe2OG5XvL/KhX8HUO9XyBaFjgFk6TLS4Xjt0VPIuMKywe7POKKPslX+QxSlVok9e+8kG5Nw==}
@@ -2684,7 +2684,7 @@ snapshots:
       '@earendil-works/pi-tui': 1.1.0
       temporal-polyfill: 1.0.5
 
-  '@alexanderfortin/semantic-release-keep-a-changelog@0.5.1(semantic-release@25.0.9(supports-color@7.2.0)(typescript@7.0.2))':
+  '@alexanderfortin/semantic-release-keep-a-changelog@0.6.0(semantic-release@25.0.9(supports-color@7.2.0)(typescript@7.0.2))':
     dependencies:
       '@semantic-release/error': 4.0.0
       conventional-changelog-writer: 9.3.0
