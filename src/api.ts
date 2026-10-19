@@ -36,6 +36,7 @@ const UNIT_WEEKLY = 6
 const UNIT_MONTHLY_TOOLS = 5
 
 const ZAI_USAGE_API_URL = "https://api.z.ai/api/monitor/usage/quota/limit"
+const ZAI_USAGE_API_CN_URL = "https://open.bigmodel.cn/api/monitor/usage/quota/limit"
 
 export interface ZaiUsageResponse {
   data: {
@@ -119,14 +120,14 @@ function toQuotaWindow(limit: ZaiLimit | undefined): ZaiQuotaWindow | undefined 
  * Fetch Z.ai usage from the API
  *
  * Uses shared library primitives (buildAuthHeaders, safeFetch, safeParseJson)
- * for sandbox-aware auth, error handling, and JSON parsing.
+ * for sandbox-aware auth, error handling, and JSON parsing. The endpoint is
+ * selected from provider key availability (see fetchUsageResponse): a `zai`
+ * key targets api.z.ai, a `zai-coding-cn` key targets open.bigmodel.cn.
  */
 export async function getZaiUsage(
   modelRegistry: Pick<ModelRegistry, "getApiKeyForProvider">,
 ): Promise<ZaiUsageData> {
-  const headers = await buildAuthHeaders(modelRegistry, "zai")
-
-  const response = await safeFetch(ZAI_USAGE_API_URL, { headers })
+  const response = await fetchUsageResponse(modelRegistry)
 
   const parsed = await safeParseJson(response)
 
@@ -165,6 +166,31 @@ export async function getZaiUsage(
   }
 
   return result
+}
+
+/**
+ * Select the quota endpoint and auth headers by provider availability:
+ *
+ * 1. `zai` has a real key → international endpoint with that key
+ * 2. `zai-coding-cn` has a real key → China endpoint (open.bigmodel.cn)
+ * 3. Neither has a real key → international endpoint without auth, which
+ *    preserves the sandbox "proxy-managed" behavior (the proxy injects the
+ *    Authorization header) and the historical no-key 401 error.
+ */
+async function fetchUsageResponse(
+  modelRegistry: Pick<ModelRegistry, "getApiKeyForProvider">,
+): Promise<Response> {
+  const intlHeaders = await buildAuthHeaders(modelRegistry, "zai")
+  if (intlHeaders.Authorization) {
+    return safeFetch(ZAI_USAGE_API_URL, { headers: intlHeaders })
+  }
+
+  const cnHeaders = await buildAuthHeaders(modelRegistry, "zai-coding-cn")
+  if (cnHeaders.Authorization) {
+    return safeFetch(ZAI_USAGE_API_CN_URL, { headers: cnHeaders })
+  }
+
+  return safeFetch(ZAI_USAGE_API_URL, { headers: intlHeaders })
 }
 
 // Re-export UsageError for consumers that need it
