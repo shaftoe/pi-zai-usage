@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-19
+
+### Added
+
+- support zai-coding-cn provider with China endpoint fallback (#85)
+
+### Changed
+
+- **deps**: bump all, Pi to v1.1.0
+- **deps-dev**: update dependency @alexanderfortin/semantic-release-keep-a-changelog to ^0.5.0 (#69)
+- **deps-dev**: update dependency @alexanderfortin/semantic-release-keep-a-changelog to ^0.5.1 (#77)
+- **deps-dev**: update pnpm to v12.10.1 (#72)
+- **deps-dev**: update pnpm to v12.11.2 (#76)
+- **deps-dev**: update pnpm to v12.14.0 (#84)
+- **deps-dev**: update vitest monorepo to ^4.1.11 (#68)
+- **deps-dev**: update vitest monorepo to v5 (#75)
+
 ## [0.5.0] - 2026-09-25
 
 ### Added
@@ -186,7 +203,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enabled full OIDC publishing (no NPM_TOKEN required)
 
-[unreleased]: https://github.com/shaftoe/pi-zai-usage/compare/v0.5.0...HEAD
+[unreleased]: https://github.com/shaftoe/pi-zai-usage/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/shaftoe/pi-zai-usage/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/shaftoe/pi-zai-usage/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/shaftoe/pi-zai-usage/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/shaftoe/pi-zai-usage/compare/v0.3.1...v0.3.2
