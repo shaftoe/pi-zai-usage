@@ -94,6 +94,14 @@ The extension uses the Z.ai API endpoint: `https://api.z.ai/api/monitor/usage/qu
 
 Make sure you're logged in to Z.ai via Pi (`/login for Z.ai`).
 
+### GLM Coding Plan (China) users
+
+If you're on the GLM Coding Plan (China) and logged in via the `zai-coding-cn`
+provider (`/login for ZAI Coding Plan (China)`), the extension automatically
+uses the China endpoint `https://open.bigmodel.cn/api/monitor/usage/quota/limit`
+with that provider's credentials. When keys for both providers are present,
+the international endpoint takes precedence.
+
 ## Releasing
 
 This project uses automated publishing to NPM via GitHub Actions. The workflow will:

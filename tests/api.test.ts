@@ -86,11 +86,13 @@ describe("getZaiUsage", () => {
     mockFetch.mockRestore()
   })
 
-  it("should make the request without Authorization header when no API key (proxy mode)", async () => {
+  it("should stay on the international endpoint without Authorization when no key is configured for either provider", async () => {
     mockModelRegistry.getApiKeyForProvider = async () => null
     let fetchHeaders: any
+    let fetchUrl: string | undefined
 
-    mockFetch.mockImplementationOnce((_url: string, options: RequestInit) => {
+    mockFetch.mockImplementationOnce((url: string, options: RequestInit) => {
+      fetchUrl = url
       fetchHeaders = options.headers
       return Promise.resolve(mockOkResponse(fullResponse({ fiveHourPct: 50 })))
     })
@@ -100,13 +102,16 @@ describe("getZaiUsage", () => {
     const headers = fetchHeaders as Record<string, string>
     expect(headers.Authorization).toBeUndefined()
     expect(headers["Accept-Encoding"]).toBe("identity")
+    expect(fetchUrl).toBe("https://api.z.ai/api/monitor/usage/quota/limit")
   })
 
-  it("should make the request without Authorization header for empty string key (proxy mode)", async () => {
+  it("should stay on the international endpoint without Authorization when the zai key is an empty string", async () => {
     mockModelRegistry.getApiKeyForProvider = async () => ""
     let fetchHeaders: any
+    let fetchUrl: string | undefined
 
-    mockFetch.mockImplementationOnce((_url: string, options: RequestInit) => {
+    mockFetch.mockImplementationOnce((url: string, options: RequestInit) => {
+      fetchUrl = url
       fetchHeaders = options.headers
       return Promise.resolve(mockOkResponse(fullResponse({ fiveHourPct: 30 })))
     })
@@ -115,13 +120,16 @@ describe("getZaiUsage", () => {
     expect(result.fiveHour?.percentage).toBe(30)
     const headers = fetchHeaders as Record<string, string>
     expect(headers.Authorization).toBeUndefined()
+    expect(fetchUrl).toBe("https://api.z.ai/api/monitor/usage/quota/limit")
   })
 
-  it("should make the request without Authorization header when key is the proxy sentinel", async () => {
+  it("should stay on the international endpoint when the zai key is the proxy sentinel (sandbox injects auth)", async () => {
     mockModelRegistry.getApiKeyForProvider = async () => "proxy-managed"
     let fetchHeaders: any
+    let fetchUrl: string | undefined
 
-    mockFetch.mockImplementationOnce((_url: string, options: RequestInit) => {
+    mockFetch.mockImplementationOnce((url: string, options: RequestInit) => {
+      fetchUrl = url
       fetchHeaders = options.headers
       return Promise.resolve(mockOkResponse(fullResponse({ fiveHourPct: 70 })))
     })
@@ -131,6 +139,7 @@ describe("getZaiUsage", () => {
     const headers = fetchHeaders as Record<string, string>
     expect(headers.Authorization).toBeUndefined()
     expect(headers["Accept-Encoding"]).toBe("identity")
+    expect(fetchUrl).toBe("https://api.z.ai/api/monitor/usage/quota/limit")
   })
 
   it("should throw an error when API request fails with 401", async () => {
@@ -493,5 +502,117 @@ describe("getZaiUsage", () => {
       expect((e as UsageError).message).toBe("Z.ai API error: rate limit exceeded")
       expect((e as UsageError).code).toBe("api429")
     }
+  })
+})
+
+describe("getZaiUsage endpoint selection (international vs China)", () => {
+  const INTL_URL = "https://api.z.ai/api/monitor/usage/quota/limit"
+  const CN_URL = "https://open.bigmodel.cn/api/monitor/usage/quota/limit"
+
+  /** Provider-aware registry mock: returns per-provider keys, records calls. */
+  function registryWithKeys(keys: Record<string, string>, calls: string[] = []) {
+    return {
+      getApiKeyForProvider: async (provider: string): Promise<string | undefined> => {
+        calls.push(provider)
+        return keys[provider]
+      },
+    }
+  }
+
+  beforeEach(() => {
+    global.fetch = vi.fn(() => Promise.resolve(mockOkResponse(fullResponse())))
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("should use the bigmodel.cn endpoint with the CN key when only zai-coding-cn has a key", async () => {
+    const registry = registryWithKeys({ "zai-coding-cn": "cn-api-key-42" })
+    let fetchUrl: string | undefined
+    let fetchHeaders: any
+
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(
+      (url: string, options: RequestInit) => {
+        fetchUrl = url
+        fetchHeaders = options.headers
+        return Promise.resolve(mockOkResponse(fullResponse({ fiveHourPct: 33 })))
+      },
+    )
+
+    const result = await getZaiUsage(registry)
+
+    expect(result.fiveHour?.percentage).toBe(33)
+    expect(fetchUrl).toBe(CN_URL)
+    const headers = fetchHeaders as Record<string, string>
+    expect(headers.Authorization).toBe("Bearer cn-api-key-42")
+    expect(headers["Accept-Encoding"]).toBe("identity")
+  })
+
+  it("should prefer the international endpoint when both providers have keys", async () => {
+    const registry = registryWithKeys({ zai: "intl-key", "zai-coding-cn": "cn-key" })
+    let fetchUrl: string | undefined
+    let fetchHeaders: any
+
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(
+      (url: string, options: RequestInit) => {
+        fetchUrl = url
+        fetchHeaders = options.headers
+        return Promise.resolve(mockOkResponse(fullResponse()))
+      },
+    )
+
+    await getZaiUsage(registry)
+
+    expect(fetchUrl).toBe(INTL_URL)
+    const headers = fetchHeaders as Record<string, string>
+    expect(headers.Authorization).toBe("Bearer intl-key")
+  })
+
+  it("should not query the CN provider when the zai key is present", async () => {
+    const calls: string[] = []
+    const registry = registryWithKeys({ zai: "intl-key" }, calls)
+
+    await getZaiUsage(registry)
+
+    expect(calls).toEqual(["zai"])
+  })
+
+  it("should query both providers before falling back when neither has a key", async () => {
+    const calls: string[] = []
+    const registry = registryWithKeys({}, calls)
+    let fetchUrl: string | undefined
+
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce((url: string) => {
+      fetchUrl = url
+      return Promise.resolve(mockOkResponse(fullResponse()))
+    })
+
+    await getZaiUsage(registry)
+
+    expect(calls).toEqual(["zai", "zai-coding-cn"])
+    expect(fetchUrl).toBe(INTL_URL)
+  })
+
+  it("should stay on the international endpoint when zai is unset and the CN key is the proxy sentinel", async () => {
+    const registry = registryWithKeys({ "zai-coding-cn": "proxy-managed" })
+    let fetchUrl: string | undefined
+    let fetchHeaders: any
+
+    ;(global.fetch as ReturnType<typeof vi.fn>).mockImplementationOnce(
+      (url: string, options: RequestInit) => {
+        fetchUrl = url
+        fetchHeaders = options.headers
+        return Promise.resolve(mockOkResponse(fullResponse()))
+      },
+    )
+
+    await getZaiUsage(registry)
+
+    // The sentinel means auth is injected elsewhere; with no explicit CN
+    // key the safest default is the historical international endpoint.
+    expect(fetchUrl).toBe(INTL_URL)
+    const headers = fetchHeaders as Record<string, string>
+    expect(headers.Authorization).toBeUndefined()
   })
 })
