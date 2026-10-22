@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       '@alexanderfortin/pi-usage-lib':
-        specifier: ^0.3.1
-        version: 0.3.1(@earendil-works/pi-coding-agent@1.1.0(@aws-sdk/credential-provider-node@3.972.85)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0))(@earendil-works/pi-tui@1.1.0)
+        specifier: ^0.3.3
+        version: 0.3.3(@earendil-works/pi-coding-agent@1.1.0(@aws-sdk/credential-provider-node@3.972.85)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0))(@earendil-works/pi-tui@1.1.0)
       '@earendil-works/pi-coding-agent':
         specifier: ^1.1.0
         version: 1.1.0(@aws-sdk/credential-provider-node@3.972.85)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0)
@@ -230,12 +230,12 @@ packages:
   '@actions/io@3.0.2':
     resolution: {integrity: sha512-nRBchcMM+QK1pdjO7/idu86rbJI5YHUKCvKs0KxnSYbVe3F51UfGxuZX4Qy/fWlp6l7gWFwIkrOzN+oUK03kfw==}
 
-  '@alexanderfortin/pi-usage-lib@0.3.1':
-    resolution: {integrity: sha512-DCieYswdWF/WN6nXj+kLZCj3PSmK4qh/G0XeQwiXQanU5fU6XGpRq51HM69DbpdMVKUMmT1KNTw3ob1OLa5uug==}
-    engines: {node: '>=24'}
+  '@alexanderfortin/pi-usage-lib@0.3.3':
+    resolution: {integrity: sha512-4VWdfQWNSsBd9A0fYeIy3ELJb+MScIcaIroJ+JwIfpK25JHoC9a/eOQZvakxWtY61R9zYut6akElAki02eAMZw==}
+    engines: {node: '>=24.21.0'}
     peerDependencies:
-      '@earendil-works/pi-coding-agent': ^0.87.1
-      '@earendil-works/pi-tui': ^0.87.1
+      '@earendil-works/pi-coding-agent': ^1.2.0
+      '@earendil-works/pi-tui': ^1.2.0
 
   '@alexanderfortin/semantic-release-keep-a-changelog@0.5.1':
     resolution: {integrity: sha512-Ij0xzVQJA62I03GSolyDj5MTTsAKbdCUlVZf3cVghXS4O49TaRr8HobsbC/4Ax6lq0zRCckmW5fPiOtPf7JBUA==}
@@ -2355,6 +2355,9 @@ packages:
   temporal-polyfill@1.0.5:
     resolution: {integrity: sha512-+H/mmY74i6wXCMcjIhGuSnODcyZnc4eois2myhOyX0UqRAKNXQY5m9iB1en5jQ/n4SXtjLXo1ElBI5bmn8tZwQ==}
 
+  temporal-polyfill@1.0.6:
+    resolution: {integrity: sha512-tYyEry1HLGUDbm2356W3iYD0OZdo7rlP7h98Zr/EnjqLZQwTAfcBDUvJnJbfA15v/vQad57hJZScG5O0W2oKEA==}
+
   temporal-spec@1.0.1:
     resolution: {integrity: sha512-wxVoanmDeavXie1vu2JaQ3WIc3JZnWAOYFBsJyATaVsXsycKYUflGsyBmrRSnoCpZJpwPyr38VpgSUlQ8CbFxg==}
 
@@ -2678,11 +2681,11 @@ snapshots:
 
   '@actions/io@3.0.2': {}
 
-  '@alexanderfortin/pi-usage-lib@0.3.1(@earendil-works/pi-coding-agent@1.1.0(@aws-sdk/credential-provider-node@3.972.85)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0))(@earendil-works/pi-tui@1.1.0)':
+  '@alexanderfortin/pi-usage-lib@0.3.3(@earendil-works/pi-coding-agent@1.1.0(@aws-sdk/credential-provider-node@3.972.85)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0))(@earendil-works/pi-tui@1.1.0)':
     dependencies:
       '@earendil-works/pi-coding-agent': 1.1.0(@aws-sdk/credential-provider-node@3.972.85)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0)
       '@earendil-works/pi-tui': 1.1.0
-      temporal-polyfill: 1.0.5
+      temporal-polyfill: 1.0.6
 
   '@alexanderfortin/semantic-release-keep-a-changelog@0.5.1(semantic-release@25.0.9(supports-color@7.2.0)(typescript@7.0.2))':
     dependencies:
@@ -4709,6 +4712,11 @@ snapshots:
   temp-dir@3.0.0: {}
 
   temporal-polyfill@1.0.5:
+    dependencies:
+      temporal-spec: 1.0.1
+      temporal-utils: 1.0.3
+
+  temporal-polyfill@1.0.6:
     dependencies:
       temporal-spec: 1.0.1
       temporal-utils: 1.0.3
