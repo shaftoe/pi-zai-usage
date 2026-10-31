@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       '@alexanderfortin/pi-usage-lib':
-        specifier: ^0.3.3
-        version: 0.3.3(@earendil-works/pi-coding-agent@1.4.0(@aws-sdk/credential-provider-node@3.972.90)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0))(@earendil-works/pi-tui@1.4.0)
+        specifier: ^0.3.4
+        version: 0.3.4(@earendil-works/pi-coding-agent@1.4.0(@aws-sdk/credential-provider-node@3.972.90)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0))(@earendil-works/pi-tui@1.4.0)
       '@earendil-works/pi-coding-agent':
         specifier: ^1.4.0
         version: 1.4.0(@aws-sdk/credential-provider-node@3.972.90)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0)
@@ -230,9 +230,9 @@ packages:
   '@actions/io@3.0.2':
     resolution: {integrity: sha512-nRBchcMM+QK1pdjO7/idu86rbJI5YHUKCvKs0KxnSYbVe3F51UfGxuZX4Qy/fWlp6l7gWFwIkrOzN+oUK03kfw==}
 
-  '@alexanderfortin/pi-usage-lib@0.3.3':
-    resolution: {integrity: sha512-4VWdfQWNSsBd9A0fYeIy3ELJb+MScIcaIroJ+JwIfpK25JHoC9a/eOQZvakxWtY61R9zYut6akElAki02eAMZw==}
-    engines: {node: '>=24.21.0'}
+  '@alexanderfortin/pi-usage-lib@0.3.4':
+    resolution: {integrity: sha512-o0oJBbm6Wqo6IA1OreYO5Esi+4YAixmZgXq5y262xA6gAcMWdUds8TIfY+nXoSstAybAbgrdsEnZBZ46dB6ZNg==}
+    engines: {node: '>=26.13.0'}
     peerDependencies:
       '@earendil-works/pi-coding-agent': ^1.2.0
       '@earendil-works/pi-tui': ^1.2.0
@@ -2535,7 +2535,7 @@ snapshots:
 
   '@actions/io@3.0.2': {}
 
-  '@alexanderfortin/pi-usage-lib@0.3.3(@earendil-works/pi-coding-agent@1.4.0(@aws-sdk/credential-provider-node@3.972.90)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0))(@earendil-works/pi-tui@1.4.0)':
+  '@alexanderfortin/pi-usage-lib@0.3.4(@earendil-works/pi-coding-agent@1.4.0(@aws-sdk/credential-provider-node@3.972.90)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0))(@earendil-works/pi-tui@1.4.0)':
     dependencies:
       '@earendil-works/pi-coding-agent': 1.4.0(@aws-sdk/credential-provider-node@3.972.90)(@smithy/signature-v4@5.7.4)(supports-color@7.2.0)(ws@8.22.0)
       '@earendil-works/pi-tui': 1.4.0
