@@ -168,13 +168,13 @@ importers:
     dependencies:
       '@alexanderfortin/pi-usage-lib':
         specifier: ^0.3.5
-        version: 0.3.5(@earendil-works/pi-coding-agent@1.5.2(@aws-sdk/credential-provider-node@3.972.97)(@smithy/signature-v4@5.7.5)(supports-color@7.2.0)(ws@8.23.0))(@earendil-works/pi-tui@1.5.2)
+        version: 0.3.5(@earendil-works/pi-coding-agent@1.5.2(@aws-sdk/credential-provider-node@3.972.97)(@smithy/signature-v4@5.7.5)(supports-color@7.2.0)(ws@8.23.0))(@earendil-works/pi-tui@1.7.0)
       '@earendil-works/pi-coding-agent':
         specifier: ^1.5.2
         version: 1.5.2(@aws-sdk/credential-provider-node@3.972.97)(@smithy/signature-v4@5.7.5)(supports-color@7.2.0)(ws@8.23.0)
       '@earendil-works/pi-tui':
-        specifier: ^1.5.2
-        version: 1.5.2
+        specifier: ^1.7.0
+        version: 1.7.0
       temporal-polyfill:
         specifier: ^1.0.8
         version: 1.0.8
@@ -470,6 +470,10 @@ packages:
 
   '@earendil-works/pi-tui@1.5.2':
     resolution: {integrity: sha512-WK8ih+c88GWizaB79y7Pq3PV7ySf5VI1pZ1i/6aBBjDOAiG2EE3ojKjl+pxQqLfyQGnzHYu4VfakOBJgumuoyw==}
+    engines: {node: '>=22.19.0'}
+
+  '@earendil-works/pi-tui@1.7.0':
+    resolution: {integrity: sha512-C6vkUYGTeDdl/cMIbFOabSEPMRy9HuaUV76PS2BhvSmWifO5y8Rz8/LgFWqGIIFS7RMqu0gdeEpdXfH8jIp05g==}
     engines: {node: '>=22.19.0'}
 
   '@emnapi/core@2.0.0-beta.2':
@@ -2571,10 +2575,10 @@ snapshots:
 
   '@actions/io@3.0.2': {}
 
-  '@alexanderfortin/pi-usage-lib@0.3.5(@earendil-works/pi-coding-agent@1.5.2(@aws-sdk/credential-provider-node@3.972.97)(@smithy/signature-v4@5.7.5)(supports-color@7.2.0)(ws@8.23.0))(@earendil-works/pi-tui@1.5.2)':
+  '@alexanderfortin/pi-usage-lib@0.3.5(@earendil-works/pi-coding-agent@1.5.2(@aws-sdk/credential-provider-node@3.972.97)(@smithy/signature-v4@5.7.5)(supports-color@7.2.0)(ws@8.23.0))(@earendil-works/pi-tui@1.7.0)':
     dependencies:
       '@earendil-works/pi-coding-agent': 1.5.2(@aws-sdk/credential-provider-node@3.972.97)(@smithy/signature-v4@5.7.5)(supports-color@7.2.0)(ws@8.23.0)
-      '@earendil-works/pi-tui': 1.5.2
+      '@earendil-works/pi-tui': 1.7.0
       temporal-polyfill: 1.0.8
 
   '@alexanderfortin/semantic-release-keep-a-changelog@0.6.2(semantic-release@25.0.9(supports-color@7.2.0)(typescript@7.0.2))':
@@ -2937,6 +2941,12 @@ snapshots:
   '@earendil-works/pi-telemetry@1.5.2': {}
 
   '@earendil-works/pi-tui@1.5.2':
+    dependencies:
+      get-east-asian-width: 1.6.0
+      marked: 18.0.11
+      marked-cjk-friendly: 0.1.2(marked@18.0.11)
+
+  '@earendil-works/pi-tui@1.7.0':
     dependencies:
       get-east-asian-width: 1.6.0
       marked: 18.0.11
